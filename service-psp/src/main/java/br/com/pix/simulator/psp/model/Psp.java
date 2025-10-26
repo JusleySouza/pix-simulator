@@ -16,10 +16,10 @@ public class Psp {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private UUID pspId;
 
     @Column(nullable = false)
-    private String name;
+    private String bankName;
 
     @Column(nullable = false, unique = true, length = 3)
     private String bankCode;
