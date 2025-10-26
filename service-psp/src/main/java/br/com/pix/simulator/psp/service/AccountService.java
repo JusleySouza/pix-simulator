@@ -2,6 +2,9 @@ package br.com.pix.simulator.psp.service;
 
 import br.com.pix.simulator.psp.dto.account.AccountCreateRequest;
 import br.com.pix.simulator.psp.dto.account.AccountResponse;
+import br.com.pix.simulator.psp.dto.balance.BalanceResponse;
+import br.com.pix.simulator.psp.dto.balance.DepositRequest;
+import br.com.pix.simulator.psp.exception.ResourceNotFoundException;
 import br.com.pix.simulator.psp.model.Account;
 import br.com.pix.simulator.psp.model.Psp;
 import br.com.pix.simulator.psp.model.User;
@@ -11,6 +14,8 @@ import br.com.pix.simulator.psp.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Service
 public class AccountService {
@@ -51,6 +56,17 @@ public class AccountService {
                 savedAccount.getAccountNumber(),
                 savedAccount.getBalance()
         );
+    }
+
+    @Transactional
+    public BalanceResponse deposit(UUID accountId, DepositRequest request) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + accountId));
+
+        account.credit(request.value());
+        accountRepository.save(account);
+
+        return new BalanceResponse(account.getAccountId(), account.getBalance());
     }
 
 }
