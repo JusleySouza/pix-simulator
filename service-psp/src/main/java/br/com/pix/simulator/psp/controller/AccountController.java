@@ -32,4 +32,9 @@ public class AccountController {
         return ResponseEntity.ok(accountService.deposit(accountId, request));
     }
 
+    @GetMapping("/{accountId}/balance")
+    public ResponseEntity<BalanceResponse> checkBalance(@PathVariable UUID accountId) {
+        return ResponseEntity.ok(accountService.checkBalance(accountId));
+    }
+
 }
