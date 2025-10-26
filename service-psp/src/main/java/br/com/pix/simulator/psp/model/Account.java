@@ -1,5 +1,6 @@
 package br.com.pix.simulator.psp.model;
 
+import br.com.pix.simulator.psp.exception.InsufficientBalanceException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -35,5 +36,8 @@ public class Account {
 
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal balance;
+
+    @Version
+    private Long version;
 
 }
