@@ -1,6 +1,5 @@
 package br.com.pix.simulator.psp.model;
 
-import br.com.pix.simulator.psp.exception.InsufficientBalanceException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,7 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "contas")
+@Table(name = "accounts")
 public class Account {
 
     @Id
@@ -25,7 +24,7 @@ public class Account {
     private Psp psp;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(nullable = false, length = 4)
@@ -39,5 +38,14 @@ public class Account {
 
     @Version
     private Long version;
+
+
+    public void credit(BigDecimal value) {
+        if (value == null || value.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Credit value must be positive.");
+        }
+
+        this.balance = this.balance.add(value);
+    }
 
 }
