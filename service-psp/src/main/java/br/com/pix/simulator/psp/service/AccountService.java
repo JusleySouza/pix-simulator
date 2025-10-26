@@ -69,4 +69,12 @@ public class AccountService {
         return new BalanceResponse(account.getAccountId(), account.getBalance());
     }
 
+    @Transactional(readOnly = true)
+    public BalanceResponse checkBalance(UUID accountId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + accountId));
+
+        return new BalanceResponse(account.getAccountId(), account.getBalance());
+    }
+
 }
