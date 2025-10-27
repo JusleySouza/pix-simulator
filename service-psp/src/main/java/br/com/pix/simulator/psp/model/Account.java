@@ -1,5 +1,6 @@
 package br.com.pix.simulator.psp.model;
 
+import br.com.pix.simulator.psp.exception.InsufficientBalanceException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -46,6 +47,19 @@ public class Account {
         }
 
         this.balance = this.balance.add(value);
+    }
+
+
+    public void debit(BigDecimal value) {
+        if (value == null || value.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Debit amount must be positive.");
+        }
+
+        if (this.balance.compareTo(value) < 0) {
+            throw new InsufficientBalanceException("Insufficient account balance " + this.accountId);
+        }
+
+        this.balance = this.balance.subtract(value);
     }
 
 }
