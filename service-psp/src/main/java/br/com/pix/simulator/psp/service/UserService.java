@@ -5,7 +5,6 @@ import br.com.pix.simulator.psp.dto.user.UserResponse;
 import br.com.pix.simulator.psp.exception.ResourceNotFoundException;
 import br.com.pix.simulator.psp.model.User;
 import br.com.pix.simulator.psp.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,6 +47,13 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
 
         return new UserResponse(user.getUserId(), user.getName(), user.getCpf());
+    }
+
+    @Transactional(readOnly = true)
+    public User searchUserEntity(UUID userId) {
+
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
     }
 
 }

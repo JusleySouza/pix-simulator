@@ -78,6 +78,8 @@ public class AccountService {
         return new BalanceResponse(account.getAccountId(), account.getBalance());
     }
 
+    //Methods Called by Events (RabbitMQ)
+
     @Transactional
     public void processDebit(UUID accountId, BigDecimal value) {
 

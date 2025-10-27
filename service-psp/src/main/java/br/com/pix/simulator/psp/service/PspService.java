@@ -49,4 +49,10 @@ public class PspService {
         return new PspResponse(psp.getPspId(), psp.getBankName(), psp.getBankCode());
     }
 
+    @Transactional(readOnly = true)
+    public Psp searchPspEntity(UUID pspId) {
+        return pspRepository.findById(pspId)
+                .orElseThrow(() -> new ResourceNotFoundException("PSP not found with ID: " + pspId));
+    }
+
 }
