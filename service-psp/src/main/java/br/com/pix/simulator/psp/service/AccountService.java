@@ -15,6 +15,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Service
@@ -75,6 +76,17 @@ public class AccountService {
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + accountId));
 
         return new BalanceResponse(account.getAccountId(), account.getBalance());
+    }
+
+    @Transactional
+    public void processDebit(UUID accountId, BigDecimal value) {
+
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new ResourceNotFoundException("Debit account not found: " + accountId));
+
+        account.debit(value);
+
+        accountRepository.save(account);
     }
 
 }
