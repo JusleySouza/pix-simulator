@@ -89,4 +89,14 @@ public class AccountService {
         accountRepository.save(account);
     }
 
+    @Transactional
+    public void processCredit(UUID accountId, BigDecimal value) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new ResourceNotFoundException("Credit account not found: " + accountId));
+
+        account.credit(value);
+
+        accountRepository.save(account);
+    }
+
 }
