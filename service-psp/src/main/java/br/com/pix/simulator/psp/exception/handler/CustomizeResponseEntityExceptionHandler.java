@@ -3,6 +3,7 @@ package br.com.pix.simulator.psp.exception.handler;
 import br.com.pix.simulator.psp.dto.error.FieldError;
 import br.com.pix.simulator.psp.dto.error.ResponseError;
 import br.com.pix.simulator.psp.exception.ExceptionResponse;
+import br.com.pix.simulator.psp.exception.InsufficientBalanceException;
 import br.com.pix.simulator.psp.exception.ResourceNotFoundException;
 import br.com.pix.simulator.psp.exception.ValidationException;
 import lombok.Generated;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Generated
@@ -46,7 +48,14 @@ public class CustomizeResponseEntityExceptionHandler extends ResponseEntityExcep
                 .map(fieldError -> new FieldError(fieldError.getField(), fieldError.getDefaultMessage()))
                 .collect(Collectors.toList());
         ResponseError responseError = new ResponseError(errors);
-        return new ResponseEntity<>(responseError, HttpStatus.UNPROCESSABLE_ENTITY); // 422
+        return new ResponseEntity<>(responseError, HttpStatus.BAD_REQUEST); // 400
+    }
+
+    @ExceptionHandler(InsufficientBalanceException.class)
+    public final ResponseEntity<ExceptionResponse> handleInsufficientBalance(Exception exception, WebRequest request){
+        ExceptionResponse exceptionResponse = new ExceptionResponse(
+                new Date(), exception.getMessage(), request.getDescription(false));
+        return new  ResponseEntity<>(exceptionResponse, HttpStatus.UNPROCESSABLE_ENTITY); //422
     }
 
 }
