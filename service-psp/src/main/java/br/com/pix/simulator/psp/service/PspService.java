@@ -1,5 +1,6 @@
 package br.com.pix.simulator.psp.service;
 
+import br.com.pix.simulator.psp.config.LoggerConfig;
 import br.com.pix.simulator.psp.dto.psps.PspCreateRequest;
 import br.com.pix.simulator.psp.dto.psps.PspResponse;
 import br.com.pix.simulator.psp.exception.ResourceNotFoundException;
@@ -22,6 +23,7 @@ public class PspService {
     @Transactional
     public PspResponse createPsp(PspCreateRequest request) {
         if(pspRepository.findByBankCode(request.bankCode()).isPresent()){
+            LoggerConfig.LOGGER_PSP.error("Psp existing in the database!");
             throw new IllegalArgumentException("There is already a PSP with the bank code: " + request.bankCode());
         }
 
@@ -32,6 +34,8 @@ public class PspService {
         );
 
         Psp savedPsp = pspRepository.save(psp);
+
+        LoggerConfig.LOGGER_PSP.info("Bank : " + savedPsp.getBankName() + " created successfully!");
 
         return new PspResponse(
                 savedPsp.getPspId(),
@@ -45,6 +49,8 @@ public class PspService {
 
         Psp psp = pspRepository.findById(pspId)
                 .orElseThrow(() -> new ResourceNotFoundException("PSP not found with ID: " + pspId));
+
+        LoggerConfig.LOGGER_PSP.info("Bank : " + psp.getBankName() + " returned successfully!");
 
         return new PspResponse(psp.getPspId(), psp.getBankName(), psp.getBankCode());
     }

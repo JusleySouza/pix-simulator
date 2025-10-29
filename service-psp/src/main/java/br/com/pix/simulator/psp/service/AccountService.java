@@ -1,5 +1,6 @@
 package br.com.pix.simulator.psp.service;
 
+import br.com.pix.simulator.psp.config.LoggerConfig;
 import br.com.pix.simulator.psp.dto.account.AccountCreateRequest;
 import br.com.pix.simulator.psp.dto.account.AccountResponse;
 import br.com.pix.simulator.psp.dto.balance.BalanceResponse;
@@ -11,7 +12,6 @@ import br.com.pix.simulator.psp.model.User;
 import br.com.pix.simulator.psp.repository.AccountRepository;
 import br.com.pix.simulator.psp.repository.PspRepository;
 import br.com.pix.simulator.psp.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,10 +35,10 @@ public class AccountService {
     public AccountResponse createAccount(AccountCreateRequest request) {
 
         Psp psp = pspRepository.findById(request.pspId())
-                .orElseThrow(() -> new EntityNotFoundException("PSP not found with ID: " + request.pspId()));
+                .orElseThrow(() -> new ResourceNotFoundException("PSP not found with ID: " + request.pspId()));
 
         User user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + request.userId()));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + request.userId()));
 
         Account newAccount = new Account();
         newAccount.setPsp(psp);
@@ -48,6 +48,8 @@ public class AccountService {
         newAccount.setBalance(request.initialBalance());
 
         Account savedAccount = accountRepository.save(newAccount);
+
+        LoggerConfig.LOGGER_ACCOUNT.info("Account : " + savedAccount.getAccountId() + " created successfully!");
 
         return new AccountResponse(
                 savedAccount.getAccountId(),
@@ -67,6 +69,8 @@ public class AccountService {
         account.credit(request.value());
         accountRepository.save(account);
 
+        LoggerConfig.LOGGER_ACCOUNT.info("Deposit : " + request.value() + " successfully completed!");
+
         return new BalanceResponse(account.getAccountId(), account.getBalance());
     }
 
@@ -74,6 +78,8 @@ public class AccountService {
     public BalanceResponse checkBalance(UUID accountId) {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + accountId));
+
+        LoggerConfig.LOGGER_ACCOUNT.info("Balance : " + account.getBalance() + " successfully returned!");
 
         return new BalanceResponse(account.getAccountId(), account.getBalance());
     }
@@ -88,6 +94,8 @@ public class AccountService {
 
         account.debit(value);
 
+        LoggerConfig.LOGGER_ACCOUNT.info("Debit : " + value + " successfully completed!");
+
         accountRepository.save(account);
     }
 
@@ -97,6 +105,8 @@ public class AccountService {
                 .orElseThrow(() -> new ResourceNotFoundException("Credit account not found: " + accountId));
 
         account.credit(value);
+
+        LoggerConfig.LOGGER_ACCOUNT.info("Credit : " + value + " successfully completed!");
 
         accountRepository.save(account);
     }
