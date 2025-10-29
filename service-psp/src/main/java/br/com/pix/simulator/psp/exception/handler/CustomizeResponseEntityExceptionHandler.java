@@ -1,5 +1,6 @@
 package br.com.pix.simulator.psp.exception.handler;
 
+import br.com.pix.simulator.psp.config.LoggerConfig;
 import br.com.pix.simulator.psp.dto.error.FieldError;
 import br.com.pix.simulator.psp.dto.error.ResponseError;
 import br.com.pix.simulator.psp.exception.ExceptionResponse;
@@ -19,7 +20,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Generated
@@ -30,6 +30,7 @@ public class CustomizeResponseEntityExceptionHandler extends ResponseEntityExcep
     public final ResponseEntity<ExceptionResponse> handleAllExceptions(Exception exception, WebRequest request){
         ExceptionResponse exceptionResponse = new ExceptionResponse(
                 new Date(), exception.getMessage(), request.getDescription(false));
+        LoggerConfig.LOGGER_EXCEPTION.error(exception.getMessage());
         return new  ResponseEntity<>(exceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR); //500
     }
 
@@ -37,17 +38,19 @@ public class CustomizeResponseEntityExceptionHandler extends ResponseEntityExcep
     public final ResponseEntity<ExceptionResponse> handleNotFoundExceptions(Exception exception, WebRequest request){
         ExceptionResponse exceptionResponse = new ExceptionResponse(
                 new Date(), exception.getMessage(), request.getDescription(false));
+        LoggerConfig.LOGGER_EXCEPTION.error(exception.getMessage());
         return new  ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND); //404
     }
 
     @ExceptionHandler(ValidationException.class)
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        List<FieldError> errors = ex.getBindingResult().getFieldErrors().stream()
+            MethodArgumentNotValidException exception, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        List<FieldError> errors = exception.getBindingResult().getFieldErrors().stream()
                 .map(fieldError -> new FieldError(fieldError.getField(), fieldError.getDefaultMessage()))
                 .collect(Collectors.toList());
         ResponseError responseError = new ResponseError(errors);
+        LoggerConfig.LOGGER_EXCEPTION.error(exception.getMessage());
         return new ResponseEntity<>(responseError, HttpStatus.BAD_REQUEST); // 400
     }
 
@@ -55,6 +58,7 @@ public class CustomizeResponseEntityExceptionHandler extends ResponseEntityExcep
     public final ResponseEntity<ExceptionResponse> handleInsufficientBalance(Exception exception, WebRequest request){
         ExceptionResponse exceptionResponse = new ExceptionResponse(
                 new Date(), exception.getMessage(), request.getDescription(false));
+        LoggerConfig.LOGGER_EXCEPTION.error(exception.getMessage());
         return new  ResponseEntity<>(exceptionResponse, HttpStatus.UNPROCESSABLE_ENTITY); //422
     }
 
