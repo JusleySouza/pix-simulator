@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+
+  # RabbitMQ (Message Broker)
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - pix-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Service-psp Database
+  postgres-psp:
+    image: postgres:15-alpine
+    container_name: postgres-psp
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${PSP_DB_NAME}
+    ports:
+      - "5433:5432"
+    volumes:
+      - psp_data:/var/lib/postgresql/data
+    networks:
+      - pix-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d db_psp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # --- 2. MICROSSERVICES ---
+
+  # Service PSP (Accounts and Balances)
+  service-psp:
+    build:
+      context: ./service-psp
+      args:
+        JAR_FILE: service-psp-*.jar
+    container_name: service-psp
+    environment:
+      - SPRING_JPA_SHOW-SQL=${SHOW_SQL}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL-AUTO=${DDL_AUTO}
+      - SPRING_DATASOURCE_DRIVERCLASSNAME=${DRIVER}
+      - SPRING_DATASOURCE_URL=${PSP_CONNECTION_STRING}
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=${DIALECT}
+      - SPRING_JPA_PROPERTIES_HIBERNATE_JDBC_LOB_NON_CONTEXTUAL_CREATION=${CONTEXTUAL_CREATION}
+      - SPRING_RABBITMQ_HOST=${RABBITMQ_HOST}
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+    ports:
+      - "8081:8081"
+    networks:
+      - pix-network
+    depends_on:
+      postgres-psp:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+# --- 3. NETWORK AND VOLUMES ---
+
+# Customized network
+networks:
+  pix-network:
+    driver: bridge
+
+# Volumes
+volumes:
+  rabbitmq_data:
+  psp_data:
+  dict_data:
+  spi_data:
