@@ -20,6 +20,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Generated
@@ -60,6 +61,12 @@ public class CustomizeResponseEntityExceptionHandler extends ResponseEntityExcep
                 new Date(), exception.getMessage(), request.getDescription(false));
         LoggerConfig.LOGGER_EXCEPTION.error(exception.getMessage());
         return new  ResponseEntity<>(exceptionResponse, HttpStatus.UNPROCESSABLE_ENTITY); //422
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        LoggerConfig.LOGGER_EXCEPTION.warn("Requisição inválida: {}", ex.getMessage());
+        return new ResponseEntity<>(Map.of("erro", ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
 }
