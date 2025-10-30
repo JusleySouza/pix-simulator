@@ -4,6 +4,7 @@ import br.com.pix.simulator.psp.config.LoggerConfig;
 import br.com.pix.simulator.psp.dto.psps.PspCreateRequest;
 import br.com.pix.simulator.psp.dto.psps.PspResponse;
 import br.com.pix.simulator.psp.exception.ResourceNotFoundException;
+import br.com.pix.simulator.psp.mapper.PspMapper;
 import br.com.pix.simulator.psp.model.Psp;
 import br.com.pix.simulator.psp.repository.PspRepository;
 import org.springframework.stereotype.Service;
@@ -14,34 +15,28 @@ import java.util.UUID;
 @Service
 public class PspService {
 
+    private Psp psp;
+    private final PspMapper mapper;
     private final PspRepository pspRepository;
 
-    public PspService(PspRepository pspRepository) {
+    public PspService(PspMapper mapper, PspRepository pspRepository) {
+        this.mapper = mapper;
         this.pspRepository = pspRepository;
     }
 
     @Transactional
     public PspResponse createPsp(PspCreateRequest request) {
+
         if(pspRepository.findByBankCode(request.bankCode()).isPresent()){
-            LoggerConfig.LOGGER_PSP.error("Psp existing in the database!");
             throw new IllegalArgumentException("There is already a PSP with the bank code: " + request.bankCode());
         }
 
-        Psp psp = new Psp(
-                null,
-                request.bankName(),
-                request.bankCode()
-        );
+        psp = mapper.toEntity(request);
+        pspRepository.save(psp);
 
-        Psp savedPsp = pspRepository.save(psp);
+        LoggerConfig.LOGGER_PSP.info("Bank : " + psp.getBankName() + " created successfully!");
 
-        LoggerConfig.LOGGER_PSP.info("Bank : " + savedPsp.getBankName() + " created successfully!");
-
-        return new PspResponse(
-                savedPsp.getPspId(),
-                savedPsp.getBankName(),
-                savedPsp.getBankCode()
-        );
+        return mapper.toResponse(psp);
     }
 
     @Transactional(readOnly = true)
@@ -52,7 +47,7 @@ public class PspService {
 
         LoggerConfig.LOGGER_PSP.info("Bank : " + psp.getBankName() + " returned successfully!");
 
-        return new PspResponse(psp.getPspId(), psp.getBankName(), psp.getBankCode());
+        return mapper.toResponse(psp);
     }
 
     @Transactional(readOnly = true)

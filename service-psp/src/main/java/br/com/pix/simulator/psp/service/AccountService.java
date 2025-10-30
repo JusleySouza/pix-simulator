@@ -6,6 +6,7 @@ import br.com.pix.simulator.psp.dto.account.AccountResponse;
 import br.com.pix.simulator.psp.dto.balance.BalanceResponse;
 import br.com.pix.simulator.psp.dto.balance.DepositRequest;
 import br.com.pix.simulator.psp.exception.ResourceNotFoundException;
+import br.com.pix.simulator.psp.mapper.AccountMapper;
 import br.com.pix.simulator.psp.model.Account;
 import br.com.pix.simulator.psp.model.Psp;
 import br.com.pix.simulator.psp.model.User;
@@ -21,11 +22,14 @@ import java.util.UUID;
 @Service
 public class AccountService {
 
+    private Account account;
+    private final AccountMapper mapper;
     private final AccountRepository accountRepository;
     private final PspRepository pspRepository;
     private final UserRepository userRepository;
 
-    public AccountService(AccountRepository accountRepository, PspRepository pspRepository, UserRepository userRepository) {
+    public AccountService(AccountMapper mapper, AccountRepository accountRepository, PspRepository pspRepository, UserRepository userRepository) {
+        this.mapper = mapper;
         this.accountRepository = accountRepository;
         this.pspRepository = pspRepository;
         this.userRepository = userRepository;
@@ -40,25 +44,12 @@ public class AccountService {
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + request.userId()));
 
-        Account newAccount = new Account();
-        newAccount.setPsp(psp);
-        newAccount.setUser(user);
-        newAccount.setAgency(request.agency());
-        newAccount.setAccountNumber(request.accountNumber());
-        newAccount.setBalance(request.initialBalance());
+        account = mapper.toEntity(request);
+        accountRepository.save(account);
 
-        Account savedAccount = accountRepository.save(newAccount);
+        LoggerConfig.LOGGER_ACCOUNT.info("Account : " + account.getAccountId() + " created successfully!");
 
-        LoggerConfig.LOGGER_ACCOUNT.info("Account : " + savedAccount.getAccountId() + " created successfully!");
-
-        return new AccountResponse(
-                savedAccount.getAccountId(),
-                psp.getBankName(),
-                user.getName(),
-                savedAccount.getAgency(),
-                savedAccount.getAccountNumber(),
-                savedAccount.getBalance()
-        );
+        return mapper.toResponse(account);
     }
 
     @Transactional
@@ -71,7 +62,7 @@ public class AccountService {
 
         LoggerConfig.LOGGER_ACCOUNT.info("Deposit : " + request.value() + " successfully completed!");
 
-        return new BalanceResponse(account.getAccountId(), account.getBalance());
+        return mapper.toBalanceResponse(account);
     }
 
     @Transactional(readOnly = true)
@@ -81,7 +72,7 @@ public class AccountService {
 
         LoggerConfig.LOGGER_ACCOUNT.info("Balance : " + account.getBalance() + " successfully returned!");
 
-        return new BalanceResponse(account.getAccountId(), account.getBalance());
+        return mapper.toBalanceResponse(account);
     }
 
     //Methods Called by Events (RabbitMQ)

@@ -4,6 +4,7 @@ import br.com.pix.simulator.psp.config.LoggerConfig;
 import br.com.pix.simulator.psp.dto.user.UserCreateRequest;
 import br.com.pix.simulator.psp.dto.user.UserResponse;
 import br.com.pix.simulator.psp.exception.ResourceNotFoundException;
+import br.com.pix.simulator.psp.mapper.UserMapper;
 import br.com.pix.simulator.psp.model.User;
 import br.com.pix.simulator.psp.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -14,34 +15,28 @@ import java.util.UUID;
 @Service
 public class UserService {
 
+    private User user;
+    private final UserMapper mapper;
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserMapper mapper, UserRepository userRepository) {
+        this.mapper = mapper;
         this.userRepository = userRepository;
     }
 
     @Transactional
     public UserResponse createUser(UserCreateRequest request) {
+
         if (userRepository.findByCpf(request.cpf()).isPresent()){
-            LoggerConfig.LOGGER_PSP.error("Existing CPF in the database!");
             throw new IllegalArgumentException("CPF already exists");
         }
 
-        User newUser = new User(
-                null,
-                request.name(),
-                request.cpf()
-        );
+        user = mapper.toEntity(request);
+        userRepository.save(user);
 
-        User savedUser = userRepository.save(newUser);
+        LoggerConfig.LOGGER_USER.info("User : " + user.getName() + " created successfully!");
 
-        LoggerConfig.LOGGER_USER.info("User : " + savedUser.getName() + " created successfully!");
-
-        return new UserResponse(
-                savedUser.getUserId(),
-                savedUser.getName(),
-                savedUser.getCpf()
-        );
+        return mapper.toResponse(user);
     }
 
     @Transactional(readOnly = true)
@@ -52,7 +47,7 @@ public class UserService {
 
         LoggerConfig.LOGGER_USER.info("User : " + user.getName() + " successfully returned!");
 
-        return new UserResponse(user.getUserId(), user.getName(), user.getCpf());
+        return mapper.toResponse(user);
     }
 
     @Transactional(readOnly = true)
