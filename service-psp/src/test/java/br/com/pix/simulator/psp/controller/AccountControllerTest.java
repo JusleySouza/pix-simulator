@@ -21,7 +21,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AccountController.class)
@@ -111,6 +111,20 @@ public class AccountControllerTest {
                 .andExpect(status().isNotFound());
 
         verify(service, times(1)).deposit(eq(accountId), any(DepositRequest.class));
+    }
+
+    @Test
+    @DisplayName("You should be able to check your balance successfully and receive a status of 200 OK.")
+    void checkBalance_WhenAccountExists_ShouldReturnOk() throws Exception {
+        UUID accountId = UUID.randomUUID();
+        BalanceResponse responseDto = new BalanceResponse(accountId, BigDecimal.valueOf(500.75));
+
+        when(service.checkBalance(accountId)).thenReturn(responseDto);
+
+        mockMvc.perform(get("/api/v1/accounts/{accountId}/balance", accountId))
+                .andExpect(status().isOk());
+
+        verify(service, times(1)).checkBalance(accountId);
     }
 
 }
