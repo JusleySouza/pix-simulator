@@ -2,6 +2,8 @@ package br.com.pix.simulator.psp.controller;
 
 import br.com.pix.simulator.psp.dto.account.AccountCreateRequest;
 import br.com.pix.simulator.psp.dto.account.AccountResponse;
+import br.com.pix.simulator.psp.dto.balance.BalanceResponse;
+import br.com.pix.simulator.psp.dto.balance.DepositRequest;
 import br.com.pix.simulator.psp.mapper.AccountMapper;
 import br.com.pix.simulator.psp.model.Account;
 import br.com.pix.simulator.psp.service.AccountService;
@@ -77,5 +79,21 @@ public class AccountControllerTest {
         verify(service, never()).createAccount(any());
     }
 
+    @Test
+    @DisplayName("You should successfully complete the deposit and receive a status of 200 OK.")
+    void deposit_WhenValidRequest_ShouldReturnOk() throws Exception {
+        UUID accountId = UUID.randomUUID();
+        DepositRequest requestDto = new DepositRequest(BigDecimal.valueOf(100));
+        BalanceResponse responseDto = new BalanceResponse(accountId, BigDecimal.valueOf(110));
+
+        when(service.deposit(eq(accountId), any(DepositRequest.class))).thenReturn(responseDto);
+
+        mockMvc.perform(post("/api/v1/accounts/{accountId}/deposit", accountId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isOk());
+
+        verify(service, times(1)).deposit(eq(accountId), any(DepositRequest.class));
+    }
 
 }
