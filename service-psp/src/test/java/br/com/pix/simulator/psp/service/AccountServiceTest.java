@@ -252,4 +252,20 @@ public class AccountServiceTest {
         verify(accountRepository, times(1)).save(account);
     }
 
+    @Test
+    @DisplayName("The processCredit should throw a ResourceNotFoundException if the account is not found.")
+    void processCredit_shouldThrowResourceNotFound_whenAccountNotFound() {
+        UUID accountId = UUID.randomUUID();
+        BigDecimal creditValue = BigDecimal.valueOf(50);
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> {
+            accountService.processCredit(accountId, creditValue);
+        });
+
+        verify(accountRepository, never()).save(any());
+        verify(mapper, never()).toBalanceResponse(any());
+    }
+
 }
