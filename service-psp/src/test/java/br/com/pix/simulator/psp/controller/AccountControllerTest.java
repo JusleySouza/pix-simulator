@@ -4,8 +4,8 @@ import br.com.pix.simulator.psp.dto.account.AccountCreateRequest;
 import br.com.pix.simulator.psp.dto.account.AccountResponse;
 import br.com.pix.simulator.psp.dto.balance.BalanceResponse;
 import br.com.pix.simulator.psp.dto.balance.DepositRequest;
+import br.com.pix.simulator.psp.exception.ResourceNotFoundException;
 import br.com.pix.simulator.psp.mapper.AccountMapper;
-import br.com.pix.simulator.psp.model.Account;
 import br.com.pix.simulator.psp.service.AccountService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -92,6 +92,23 @@ public class AccountControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isOk());
+
+        verify(service, times(1)).deposit(eq(accountId), any(DepositRequest.class));
+    }
+
+    @Test
+    @DisplayName("It may fail to deposit into a non-existent account and return a 404 Not Found error.")
+    void deposit_WhenAccountNotFound_ShouldReturnNotFound() throws Exception {
+        UUID accountId = UUID.randomUUID();
+        DepositRequest requestDto = new DepositRequest(BigDecimal.valueOf(100));
+
+        when(service.deposit(eq(accountId), any(DepositRequest.class)))
+                .thenThrow(new ResourceNotFoundException("Account not found: " + accountId));
+
+        mockMvc.perform(post("/api/v1/accounts/{accountId}/deposit", accountId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isNotFound());
 
         verify(service, times(1)).deposit(eq(accountId), any(DepositRequest.class));
     }
