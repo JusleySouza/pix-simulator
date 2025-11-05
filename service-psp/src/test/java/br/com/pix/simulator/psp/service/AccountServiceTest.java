@@ -185,4 +185,20 @@ public class AccountServiceTest {
         verify(mapper, never()).toBalanceResponse(any());
     }
 
+    @Test
+    @DisplayName("processDebit should debit successfully when the account exists and has a balance.")
+    void processDebit_shouldSucceed_whenAccountExistsAndHasBalance() {
+        UUID accountId = UUID.randomUUID();
+        BigDecimal debitValue = BigDecimal.valueOf(50);
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        doNothing().when(account).debit(debitValue);
+
+        accountService.processDebit(accountId, debitValue);
+
+        verify(accountRepository, times(1)).findById(accountId);
+        verify(account, times(1)).debit(debitValue);
+        verify(accountRepository, times(1)).save(account);
+    }
+
 }
