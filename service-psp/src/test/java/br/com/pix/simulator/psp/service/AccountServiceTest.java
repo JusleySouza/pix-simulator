@@ -4,6 +4,7 @@ import br.com.pix.simulator.psp.dto.account.AccountCreateRequest;
 import br.com.pix.simulator.psp.dto.account.AccountResponse;
 import br.com.pix.simulator.psp.dto.balance.BalanceResponse;
 import br.com.pix.simulator.psp.dto.balance.DepositRequest;
+import br.com.pix.simulator.psp.exception.InsufficientBalanceException;
 import br.com.pix.simulator.psp.exception.ResourceNotFoundException;
 import br.com.pix.simulator.psp.exception.ValidationException;
 import br.com.pix.simulator.psp.mapper.AccountMapper;
@@ -199,6 +200,24 @@ public class AccountServiceTest {
         verify(accountRepository, times(1)).findById(accountId);
         verify(account, times(1)).debit(debitValue);
         verify(accountRepository, times(1)).save(account);
+    }
+
+    @Test
+    @DisplayName("processDebit should throw BalanceInsufficientException if the debit fails.")
+    void processDebit_shouldThrowException_whenAccountHasNoBalance() {
+        UUID accountId = UUID.randomUUID();
+        BigDecimal debitValue = BigDecimal.valueOf(1000);
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+
+        doThrow(new InsufficientBalanceException("Insufficient account balance " + accountId))
+                .when(account).debit(debitValue);
+
+        assertThrows(InsufficientBalanceException.class, () -> {
+            accountService.processDebit(accountId, debitValue);
+        });
+
+        verify(accountRepository, never()).save(account);
     }
 
 }
