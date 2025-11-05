@@ -2,7 +2,10 @@ package br.com.pix.simulator.psp.service;
 
 import br.com.pix.simulator.psp.dto.account.AccountCreateRequest;
 import br.com.pix.simulator.psp.dto.account.AccountResponse;
+import br.com.pix.simulator.psp.dto.balance.BalanceResponse;
+import br.com.pix.simulator.psp.dto.balance.DepositRequest;
 import br.com.pix.simulator.psp.exception.ResourceNotFoundException;
+import br.com.pix.simulator.psp.exception.ValidationException;
 import br.com.pix.simulator.psp.mapper.AccountMapper;
 import br.com.pix.simulator.psp.model.Account;
 import br.com.pix.simulator.psp.model.Psp;
@@ -111,6 +114,26 @@ public class AccountServiceTest {
 
         assertTrue(exception.getMessage().contains("User not found with ID: " + request.userId()));
         verify(accountRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("You should be able to deposit successfully if the account exists.")
+    void deposit_shouldSucceed_whenAccountExists() {
+        UUID accountId = UUID.randomUUID();
+        DepositRequest request = new DepositRequest(BigDecimal.TEN);
+        BalanceResponse expectedResponse = new BalanceResponse(accountId, BigDecimal.valueOf(110));
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        when(mapper.toBalanceResponse(account)).thenReturn(expectedResponse);
+
+        BalanceResponse result = accountService.deposit(accountId, request);
+
+        assertNotNull(result);
+        assertEquals(expectedResponse.balance(), result.balance());
+
+        verify(account, times(1)).credit(BigDecimal.TEN);
+        verify(accountRepository, times(1)).save(account);
+        verify(mapper, times(1)).toBalanceResponse(account);
     }
 
 }
