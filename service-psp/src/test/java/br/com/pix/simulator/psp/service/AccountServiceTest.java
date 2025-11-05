@@ -94,4 +94,23 @@ public class AccountServiceTest {
         verify(userRepository, never()).findById(any());
     }
 
+    @Test
+    @DisplayName("createAccount should throw ResourceNotFoundException if the User is not found.")
+    void createAccount_shouldThrowResourceNotFound_whenUserNotFound() {
+        UUID pspId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        AccountCreateRequest request = new AccountCreateRequest(pspId, userId, "0001", "01234567", BigDecimal.TEN);
+
+        when(pspRepository.findById(pspId)).thenReturn(Optional.of(psp));
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> accountService.createAccount(request)
+        );
+
+        assertTrue(exception.getMessage().contains("User not found with ID: " + request.userId()));
+        verify(accountRepository, never()).save(any());
+    }
+
 }
