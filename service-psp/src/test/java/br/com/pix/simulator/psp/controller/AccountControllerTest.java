@@ -127,4 +127,18 @@ public class AccountControllerTest {
         verify(service, times(1)).checkBalance(accountId);
     }
 
+    @Test
+    @DisplayName("It may fail to check for a non-existent account balance and return a 404 Not Found error.")
+    void checkBalance_WhenAccountNotFound_ShouldReturnNotFound() throws Exception {
+        UUID accountId = UUID.randomUUID();
+
+        when(service.checkBalance(accountId))
+                .thenThrow(new ResourceNotFoundException("Account not found: " + accountId));
+
+        mockMvc.perform(get("/api/v1/accounts/{accountId}/balance", accountId))
+                .andExpect(status().isNotFound());
+
+        verify(service, times(1)).checkBalance(accountId);
+    }
+
 }
