@@ -2,6 +2,7 @@ package br.com.pix.simulator.psp.service;
 
 import br.com.pix.simulator.psp.dto.account.AccountCreateRequest;
 import br.com.pix.simulator.psp.dto.account.AccountResponse;
+import br.com.pix.simulator.psp.exception.ResourceNotFoundException;
 import br.com.pix.simulator.psp.mapper.AccountMapper;
 import br.com.pix.simulator.psp.model.Account;
 import br.com.pix.simulator.psp.model.Psp;
@@ -72,6 +73,25 @@ public class AccountServiceTest {
         verify(accountRepository, times(1)).save(account);
         verify(mapper, times(1)).toEntity(request);
         verify(mapper, times(1)).toResponse(account);
+    }
+
+    @Test
+    @DisplayName("createAccount should throw ResourceNotFoundException if the PSP is not found.")
+    void createAccount_shouldThrowResourceNotFound_whenPspNotFound() {
+        UUID pspId = UUID.randomUUID();
+        AccountCreateRequest request = new AccountCreateRequest(pspId, UUID.randomUUID(), "0001", "01234567", BigDecimal.TEN);
+
+        when(pspRepository.findById(pspId)).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> accountService.createAccount(request)
+        );
+
+        assertTrue(exception.getMessage().contains("PSP not found with ID: " + request.pspId()));
+
+        verify(accountRepository, never()).save(any());
+        verify(userRepository, never()).findById(any());
     }
 
 }
