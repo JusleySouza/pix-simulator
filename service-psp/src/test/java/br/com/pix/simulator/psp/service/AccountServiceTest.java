@@ -151,4 +151,23 @@ public class AccountServiceTest {
         verify(mapper, never()).toBalanceResponse(any());
     }
 
+    @Test
+    @DisplayName("It should successfully return the balance when the account exists.")
+    void checkBalance_shouldSucceed_whenAccountExists() {
+        UUID accountId = UUID.randomUUID();
+        BalanceResponse expectedResponse = new BalanceResponse(accountId, BigDecimal.valueOf(100));
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        when(mapper.toBalanceResponse(account)).thenReturn(expectedResponse);
+
+        BalanceResponse result = accountService.checkBalance(accountId);
+
+        assertNotNull(result);
+        assertEquals(expectedResponse.balance(), result.balance());
+        verify(accountRepository, times(1)).findById(accountId);
+        verify(mapper, times(1)).toBalanceResponse(account);
+        verify(account, never()).credit(any());
+        verify(account, never()).debit(any());
+    }
+
 }
