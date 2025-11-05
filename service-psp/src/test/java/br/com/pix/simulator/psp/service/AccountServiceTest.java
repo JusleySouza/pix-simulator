@@ -136,4 +136,19 @@ public class AccountServiceTest {
         verify(mapper, times(1)).toBalanceResponse(account);
     }
 
+    @Test
+    @DisplayName("The deposit should throw a ResourceNotFoundException if the account is not found.")
+    void deposit_shouldThrowResourceNotFound_whenAccountNotFound() {
+        UUID accountId = UUID.randomUUID();
+        DepositRequest request = new DepositRequest(BigDecimal.TEN);
+        when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> {
+            accountService.deposit(accountId, request);
+        });
+
+        verify(accountRepository, never()).save(any());
+        verify(mapper, never()).toBalanceResponse(any());
+    }
+
 }
