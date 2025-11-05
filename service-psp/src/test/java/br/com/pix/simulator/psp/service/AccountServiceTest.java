@@ -220,4 +220,20 @@ public class AccountServiceTest {
         verify(accountRepository, never()).save(account);
     }
 
+    @Test
+    @DisplayName("The processDebit should throw a ResourceNotFoundException if the account is not found.")
+    void processDebit_shouldThrowResourceNotFound_whenAccountNotFound() {
+        UUID accountId = UUID.randomUUID();
+        BigDecimal debitValue = BigDecimal.valueOf(50);
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> {
+            accountService.processDebit(accountId, debitValue);
+        });
+
+        verify(accountRepository, never()).save(any());
+        verify(mapper, never()).toBalanceResponse(any());
+    }
+
 }
