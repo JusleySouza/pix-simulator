@@ -236,4 +236,20 @@ public class AccountServiceTest {
         verify(mapper, never()).toBalanceResponse(any());
     }
 
+    @Test
+    @DisplayName("The processCredit function should successfully credit the account when it exists.")
+    void processCredit_shouldSucceed_whenAccountExists() {
+        UUID accountId = UUID.randomUUID();
+        BigDecimal creditValue = BigDecimal.valueOf(50);
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        doNothing().when(account).credit(creditValue);
+
+        accountService.processCredit(accountId, creditValue);
+
+        verify(accountRepository, times(1)).findById(accountId);
+        verify(account, times(1)).credit(creditValue);
+        verify(accountRepository, times(1)).save(account);
+    }
+
 }
