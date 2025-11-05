@@ -6,7 +6,6 @@ import br.com.pix.simulator.psp.dto.balance.BalanceResponse;
 import br.com.pix.simulator.psp.dto.balance.DepositRequest;
 import br.com.pix.simulator.psp.exception.InsufficientBalanceException;
 import br.com.pix.simulator.psp.exception.ResourceNotFoundException;
-import br.com.pix.simulator.psp.exception.ValidationException;
 import br.com.pix.simulator.psp.mapper.AccountMapper;
 import br.com.pix.simulator.psp.model.Account;
 import br.com.pix.simulator.psp.model.Psp;
