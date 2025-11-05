@@ -61,5 +61,21 @@ public class AccountControllerTest {
         verify(service, times(1)).createAccount(any(AccountCreateRequest.class));
     }
 
+    @Test
+    @DisplayName("It should fail to create an account with invalid data and return a 400 Bad Request status.")
+    void createAccount_WhenInvalidRequest_ShouldReturnBadRequest() throws Exception {
+
+        AccountCreateRequest invalidRequestDto = new AccountCreateRequest(
+                null, null, null, "12345", BigDecimal.TEN
+        );
+
+        mockMvc.perform(post("/api/v1/accounts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequestDto)))
+                .andExpect(status().isBadRequest());
+
+        verify(service, never()).createAccount(any());
+    }
+
 
 }
