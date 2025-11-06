@@ -1,5 +1,6 @@
 package br.com.pix.simulator.psp.controller;
 
+import br.com.pix.simulator.psp.dto.account.AccountCreateRequest;
 import br.com.pix.simulator.psp.dto.psps.PspCreateRequest;
 import br.com.pix.simulator.psp.dto.psps.PspResponse;
 import br.com.pix.simulator.psp.mapper.PspMapper;
@@ -13,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -54,6 +56,20 @@ public class PspControllerTest {
                 .andExpect(status().isCreated());
 
         verify(service, times(1)).createPsp(any(PspCreateRequest.class));
+    }
+
+    @Test
+    @DisplayName("It should fail to create an psp with invalid data and return a 400 Bad Request status.")
+    void createPsp_WhenInvalidRequest_ShouldReturnBadRequest() throws Exception {
+
+        PspCreateRequest invalidRequestDto = new PspCreateRequest(" ", "12345");
+
+        mockMvc.perform(post("/api/v1/psps")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequestDto)))
+                .andExpect(status().isBadRequest());
+
+        verify(service, never()).createPsp(any());
     }
 
 }
