@@ -5,7 +5,6 @@ import br.com.pix.simulator.psp.dto.account.AccountResponse;
 import br.com.pix.simulator.psp.dto.balance.BalanceResponse;
 import br.com.pix.simulator.psp.dto.balance.DepositRequest;
 import br.com.pix.simulator.psp.exception.ResourceNotFoundException;
-import br.com.pix.simulator.psp.exception.ValidationException;
 import br.com.pix.simulator.psp.mapper.AccountMapper;
 import br.com.pix.simulator.psp.service.AccountService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,7 +51,7 @@ public class AccountControllerTest {
         );
 
         AccountResponse responseDto = new AccountResponse(
-                accountId, "Banco Teste", "Cliente Teste", "0001", "01234567", BigDecimal.TEN
+                accountId, "Bank Test", "Client Test", "0001", "01234567", BigDecimal.TEN
         );
 
         when(service.createAccount(any(AccountCreateRequest.class))).thenReturn(responseDto);
@@ -73,13 +72,12 @@ public class AccountControllerTest {
                 UUID.randomUUID(), UUID.randomUUID(), null, "01234567", BigDecimal.TEN
         );
 
-        when(service.createAccount(invalidRequestDto))
-                .thenThrow(new ValidationException("Agency is required."));
-
         mockMvc.perform(post("/api/v1/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("agency"))
+                .andExpect(jsonPath("$.errors[0].message").value( "Agency is required."));
 
         verify(service, never()).createAccount(any());
     }
@@ -92,13 +90,12 @@ public class AccountControllerTest {
                 null, UUID.randomUUID(), "0001", "01234567", BigDecimal.TEN
         );
 
-        when(service.createAccount(invalidRequestDto))
-                .thenThrow(new ValidationException("Psp id is required."));
-
         mockMvc.perform(post("/api/v1/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("pspId"))
+                .andExpect(jsonPath("$.errors[0].message").value( "Psp id is required."));
 
         verify(service, never()).createAccount(any());
     }
@@ -111,51 +108,48 @@ public class AccountControllerTest {
                 UUID.randomUUID(), null, "0001", "01234567", BigDecimal.TEN
         );
 
-        when(service.createAccount(invalidRequestDto))
-                .thenThrow(new ValidationException("User id is required."));
-
         mockMvc.perform(post("/api/v1/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("userId"))
+                .andExpect(jsonPath("$.errors[0].message").value( "User id is required."));
 
         verify(service, never()).createAccount(any());
     }
 
     @Test
     @DisplayName("Creating an Account with a shorter agency should fail and return a 400 Bad Request status.")
-    void createAccount_WhenUserIdIsShorter_ShouldReturnBadRequest() throws Exception {
+    void createAccount_WhenAgencyIsShorter_ShouldReturnBadRequest() throws Exception {
 
         AccountCreateRequest invalidRequestDto = new AccountCreateRequest(
                 UUID.randomUUID(), UUID.randomUUID(), "001", "01234567", BigDecimal.TEN
         );
 
-        when(service.createAccount(invalidRequestDto))
-                .thenThrow(new ValidationException("The agency must contain 4 digits."));
-
         mockMvc.perform(post("/api/v1/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("agency"))
+                .andExpect(jsonPath("$.errors[0].message").value( "The agency must contain 4 digits."));
 
         verify(service, never()).createAccount(any());
     }
 
     @Test
     @DisplayName("Creating an Account with a larger agency should fail and return a 400 Bad Request status.")
-    void createAccount_WhenUserIdIsLarger_ShouldReturnBadRequest() throws Exception {
+    void createAccount_WhenAgencyIsLarger_ShouldReturnBadRequest() throws Exception {
 
         AccountCreateRequest invalidRequestDto = new AccountCreateRequest(
                 UUID.randomUUID(), UUID.randomUUID(), "00012", "01234567", BigDecimal.TEN
         );
 
-        when(service.createAccount(invalidRequestDto))
-                .thenThrow(new ValidationException("The agency must contain 4 digits."));
-
         mockMvc.perform(post("/api/v1/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("agency"))
+                .andExpect(jsonPath("$.errors[0].message").value( "The agency must contain 4 digits."));
 
         verify(service, never()).createAccount(any());
     }
@@ -168,13 +162,12 @@ public class AccountControllerTest {
                 UUID.randomUUID(), UUID.randomUUID(), "0001", null, BigDecimal.TEN
         );
 
-        when(service.createAccount(invalidRequestDto))
-                .thenThrow(new ValidationException("Account number is required."));
-
         mockMvc.perform(post("/api/v1/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("accountNumber"))
+                .andExpect(jsonPath("$.errors[0].message").value("Account number is required."));
 
         verify(service, never()).createAccount(any());
     }
@@ -187,13 +180,12 @@ public class AccountControllerTest {
                 UUID.randomUUID(), UUID.randomUUID(), "0001", "0123456", BigDecimal.TEN
         );
 
-        when(service.createAccount(invalidRequestDto))
-                .thenThrow(new ValidationException("The account number must contain 8 digits."));
-
         mockMvc.perform(post("/api/v1/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("accountNumber"))
+                .andExpect(jsonPath("$.errors[0].message").value("The account number must contain 8 digits."));
 
         verify(service, never()).createAccount(any());
     }
@@ -206,13 +198,12 @@ public class AccountControllerTest {
                 UUID.randomUUID(), UUID.randomUUID(), "0001", "012345678", BigDecimal.TEN
         );
 
-        when(service.createAccount(invalidRequestDto))
-                .thenThrow(new ValidationException("The account number must contain 8 digits."));
-
         mockMvc.perform(post("/api/v1/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("accountNumber"))
+                .andExpect(jsonPath("$.errors[0].message").value("The account number must contain 8 digits."));
 
         verify(service, never()).createAccount(any());
     }
@@ -225,13 +216,12 @@ public class AccountControllerTest {
                 UUID.randomUUID(), UUID.randomUUID(), "0001", "01234567", null
         );
 
-        when(service.createAccount(invalidRequestDto))
-                .thenThrow(new ValidationException("Initial balance is required."));
-
         mockMvc.perform(post("/api/v1/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("initialBalance"))
+                .andExpect(jsonPath("$.errors[0].message").value("Initial balance is required."));
 
         verify(service, never()).createAccount(any());
     }
@@ -241,16 +231,15 @@ public class AccountControllerTest {
     void createAccount_WhenInitialBalanceIsNegative_ShouldReturnBadRequest() throws Exception {
 
         AccountCreateRequest invalidRequestDto = new AccountCreateRequest(
-                UUID.randomUUID(), UUID.randomUUID(), "0001", "01234567", BigDecimal.valueOf(-150)
+                UUID.randomUUID(), UUID.randomUUID(), "0001", "01234567", new BigDecimal(-150)
         );
-
-        when(service.createAccount(invalidRequestDto))
-                .thenThrow(new ValidationException("The initial balance must be greater than zero."));
 
         mockMvc.perform(post("/api/v1/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("initialBalance"))
+                .andExpect(jsonPath("$.errors[0].message").value("The initial balance must be greater than zero."));
 
         verify(service, never()).createAccount(any());
     }
