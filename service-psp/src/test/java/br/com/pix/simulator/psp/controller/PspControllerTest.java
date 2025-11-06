@@ -111,6 +111,23 @@ public class PspControllerTest {
     }
 
     @Test
+    @DisplayName("Creating a PSP with an larger bank code should fail and return a 400 Bad Request status.")
+    void createPsp_WhenBankCodeIsLarger_ShouldReturnBadRequest() throws Exception {
+
+        PspCreateRequest invalidRequestDto = new PspCreateRequest("Inter", "00123");
+
+        when(service.createPsp(invalidRequestDto))
+                .thenThrow(new ValidationException("The bank code must contain 3 digits."));
+
+        mockMvc.perform(post("/api/v1/psps")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequestDto)))
+                .andExpect(status().isBadRequest());
+
+        verify(service, never()).createPsp(any());
+    }
+
+    @Test
     @DisplayName("You should be able to successfully query your PSP and receive a 200 OK status.")
     void searchingPspById_WhenPspExists_ShouldReturnOk() throws Exception {
         UUID pspId = UUID.randomUUID();
