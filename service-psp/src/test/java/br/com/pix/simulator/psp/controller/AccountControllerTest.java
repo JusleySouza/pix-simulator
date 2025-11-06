@@ -236,6 +236,25 @@ public class AccountControllerTest {
     }
 
     @Test
+    @DisplayName("Creating an Account with a negative balance initial should fail and return a 400 Bad Request status.")
+    void createAccount_WhenInitialBalanceIsNegative_ShouldReturnBadRequest() throws Exception {
+
+        AccountCreateRequest invalidRequestDto = new AccountCreateRequest(
+                UUID.randomUUID(), UUID.randomUUID(), "0001", "01234567", BigDecimal.valueOf(-150)
+        );
+
+        when(service.createAccount(invalidRequestDto))
+                .thenThrow(new ValidationException("The initial balance must be greater than zero."));
+
+        mockMvc.perform(post("/api/v1/accounts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequestDto)))
+                .andExpect(status().isBadRequest());
+
+        verify(service, never()).createAccount(any());
+    }
+
+    @Test
     @DisplayName("You should successfully complete the deposit and receive a status of 200 OK.")
     void deposit_WhenValidRequest_ShouldReturnOk() throws Exception {
         UUID accountId = UUID.randomUUID();
