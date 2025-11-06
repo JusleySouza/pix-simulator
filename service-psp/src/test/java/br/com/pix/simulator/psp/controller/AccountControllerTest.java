@@ -160,6 +160,25 @@ public class AccountControllerTest {
     }
 
     @Test
+    @DisplayName("Creating a Account with an empty accountNumber should fail and return a 400 Bad Request status.")
+    void createAccount_WhenAccountNumberIsEmpty_ShouldReturnBadRequest() throws Exception {
+
+        AccountCreateRequest invalidRequestDto = new AccountCreateRequest(
+                UUID.randomUUID(), UUID.randomUUID(), "0001", null, BigDecimal.TEN
+        );
+
+        when(service.createAccount(invalidRequestDto))
+                .thenThrow(new ValidationException("Account number is required."));
+
+        mockMvc.perform(post("/api/v1/accounts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequestDto)))
+                .andExpect(status().isBadRequest());
+
+        verify(service, never()).createAccount(any());
+    }
+
+    @Test
     @DisplayName("You should successfully complete the deposit and receive a status of 200 OK.")
     void deposit_WhenValidRequest_ShouldReturnOk() throws Exception {
         UUID accountId = UUID.randomUUID();
