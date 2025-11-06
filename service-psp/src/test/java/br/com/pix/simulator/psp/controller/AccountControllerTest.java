@@ -69,11 +69,30 @@ public class AccountControllerTest {
     void createAccount_WhenAgencyIsEmpty_ShouldReturnBadRequest() throws Exception {
 
         AccountCreateRequest invalidRequestDto = new AccountCreateRequest(
-                UUID.randomUUID(), UUID.randomUUID(), null, "12345", BigDecimal.TEN
+                UUID.randomUUID(), UUID.randomUUID(), null, "01234567", BigDecimal.TEN
         );
 
         when(service.createAccount(invalidRequestDto))
                 .thenThrow(new ValidationException("Agency is required."));
+
+        mockMvc.perform(post("/api/v1/accounts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequestDto)))
+                .andExpect(status().isBadRequest());
+
+        verify(service, never()).createAccount(any());
+    }
+
+    @Test
+    @DisplayName("Creating an Account with a null pspId should fail and return a 400 Bad Request status.")
+    void createAccount_WhenPspIdIsNull_ShouldReturnBadRequest() throws Exception {
+
+        AccountCreateRequest invalidRequestDto = new AccountCreateRequest(
+                null, UUID.randomUUID(), "0001", "01234567", BigDecimal.TEN
+        );
+
+        when(service.createAccount(invalidRequestDto))
+                .thenThrow(new ValidationException("Psp id is required."));
 
         mockMvc.perform(post("/api/v1/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
