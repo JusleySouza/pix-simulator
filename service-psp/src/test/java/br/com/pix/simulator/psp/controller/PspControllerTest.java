@@ -2,6 +2,8 @@ package br.com.pix.simulator.psp.controller;
 
 import br.com.pix.simulator.psp.dto.psps.PspCreateRequest;
 import br.com.pix.simulator.psp.dto.psps.PspResponse;
+import br.com.pix.simulator.psp.exception.ResourceNotFoundException;
+import br.com.pix.simulator.psp.exception.ValidationException;
 import br.com.pix.simulator.psp.mapper.PspMapper;
 import br.com.pix.simulator.psp.service.PspService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,6 +65,9 @@ public class PspControllerTest {
 
         PspCreateRequest invalidRequestDto = new PspCreateRequest(" ", "12345");
 
+        when(service.createPsp(invalidRequestDto))
+                .thenThrow(new ValidationException("Bank name is required."));
+
         mockMvc.perform(post("/api/v1/psps")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
@@ -81,6 +86,21 @@ public class PspControllerTest {
 
         mockMvc.perform(get("/api/v1/psps/{pspId}", pspId))
                 .andExpect(status().isOk());
+
+        verify(service, times(1)).searchPspById(pspId);
+    }
+
+
+    @Test
+    @DisplayName("It may fail to check for a non-existent psp and return a 404 Not Found error.")
+    void searchingPspById_WhenPspNotFound_ShouldNotFound() throws Exception {
+        UUID pspId = UUID.randomUUID();
+
+        when(service.searchPspById(pspId))
+                .thenThrow(new ResourceNotFoundException("Psp not found: " + pspId));
+
+        mockMvc.perform(get("/api/v1/psps/{pspId}", pspId))
+                .andExpect(status().isNotFound());
 
         verify(service, times(1)).searchPspById(pspId);
     }
