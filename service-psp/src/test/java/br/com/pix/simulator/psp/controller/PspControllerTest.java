@@ -1,6 +1,5 @@
 package br.com.pix.simulator.psp.controller;
 
-import br.com.pix.simulator.psp.dto.account.AccountCreateRequest;
 import br.com.pix.simulator.psp.dto.psps.PspCreateRequest;
 import br.com.pix.simulator.psp.dto.psps.PspResponse;
 import br.com.pix.simulator.psp.mapper.PspMapper;
@@ -14,11 +13,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -70,6 +69,20 @@ public class PspControllerTest {
                 .andExpect(status().isBadRequest());
 
         verify(service, never()).createPsp(any());
+    }
+
+    @Test
+    @DisplayName("You should be able to successfully query your PSP and receive a 200 OK status.")
+    void searchingPspById_WhenPspExists_ShouldReturnOk() throws Exception {
+        UUID pspId = UUID.randomUUID();
+        PspResponse responseDto = new PspResponse(pspId, "Inter", "001");
+
+        when(service.searchPspById(pspId)).thenReturn(responseDto);
+
+        mockMvc.perform(get("/api/v1/psps/{pspId}", pspId))
+                .andExpect(status().isOk());
+
+        verify(service, times(1)).searchPspById(pspId);
     }
 
 }
