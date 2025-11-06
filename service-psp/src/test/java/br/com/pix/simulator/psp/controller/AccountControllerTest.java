@@ -306,6 +306,22 @@ public class AccountControllerTest {
     }
 
     @Test
+    @DisplayName("Should return 400 Bad Request when deposit value is negative")
+    void deposit_WhenValueIsNegative_ShouldReturnBadRequest() throws Exception {
+        UUID accountId = UUID.randomUUID();
+        DepositRequest requestDto = new DepositRequest(new BigDecimal("-100.00"));
+
+        mockMvc.perform(post("/api/v1/accounts/{accountId}/deposit", accountId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("value"))
+                .andExpect(jsonPath("$.errors[0].message").value("The deposit value must be greater than zero."));
+
+        verify(service, never()).deposit(any(UUID.class), any(DepositRequest.class));
+    }
+
+    @Test
     @DisplayName("You should be able to check your balance successfully and receive a status of 200 OK.")
     void checkBalance_WhenAccountExists_ShouldReturnOk() throws Exception {
         UUID accountId = UUID.randomUUID();
