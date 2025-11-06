@@ -3,7 +3,6 @@ package br.com.pix.simulator.psp.controller;
 import br.com.pix.simulator.psp.dto.psps.PspCreateRequest;
 import br.com.pix.simulator.psp.dto.psps.PspResponse;
 import br.com.pix.simulator.psp.exception.ResourceNotFoundException;
-import br.com.pix.simulator.psp.exception.ValidationException;
 import br.com.pix.simulator.psp.mapper.PspMapper;
 import br.com.pix.simulator.psp.service.PspService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PspController.class)
@@ -65,13 +65,12 @@ public class PspControllerTest {
 
         PspCreateRequest invalidRequestDto = new PspCreateRequest(" ", "001");
 
-        when(service.createPsp(invalidRequestDto))
-                .thenThrow(new ValidationException("Bank name is required."));
-
         mockMvc.perform(post("/api/v1/psps")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("bankName"))
+                .andExpect(jsonPath("$.errors[0].message").value("Bank name is required."));
 
         verify(service, never()).createPsp(any());
     }
@@ -82,13 +81,12 @@ public class PspControllerTest {
 
         PspCreateRequest invalidRequestDto = new PspCreateRequest("Inter", " ");
 
-        when(service.createPsp(invalidRequestDto))
-                .thenThrow(new ValidationException("Bank code is required."));
-
         mockMvc.perform(post("/api/v1/psps")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("bankCode"))
+                .andExpect(jsonPath("$.errors[0].message").value("Bank code is required."));
 
         verify(service, never()).createPsp(any());
     }
@@ -99,13 +97,12 @@ public class PspControllerTest {
 
         PspCreateRequest invalidRequestDto = new PspCreateRequest("Inter", "01");
 
-        when(service.createPsp(invalidRequestDto))
-                .thenThrow(new ValidationException("The bank code must contain 3 digits."));
-
         mockMvc.perform(post("/api/v1/psps")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("bankCode"))
+                .andExpect(jsonPath("$.errors[0].message").value("The bank code must contain 3 digits."));
 
         verify(service, never()).createPsp(any());
     }
@@ -116,13 +113,12 @@ public class PspControllerTest {
 
         PspCreateRequest invalidRequestDto = new PspCreateRequest("Inter", "00123");
 
-        when(service.createPsp(invalidRequestDto))
-                .thenThrow(new ValidationException("The bank code must contain 3 digits."));
-
         mockMvc.perform(post("/api/v1/psps")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("bankCode"))
+                .andExpect(jsonPath("$.errors[0].message").value("The bank code must contain 3 digits."));
 
         verify(service, never()).createPsp(any());
     }
