@@ -65,8 +65,8 @@ public class AccountControllerTest {
     }
 
     @Test
-    @DisplayName("It should fail to create an account with invalid data and return a 400 Bad Request status.")
-    void createAccount_WhenInvalidRequest_ShouldReturnBadRequest() throws Exception {
+    @DisplayName("Creating a Account with an empty agency should fail and return a 400 Bad Request status.")
+    void createAccount_WhenAgencyIsEmpty_ShouldReturnBadRequest() throws Exception {
 
         AccountCreateRequest invalidRequestDto = new AccountCreateRequest(
                 UUID.randomUUID(), UUID.randomUUID(), null, "12345", BigDecimal.TEN

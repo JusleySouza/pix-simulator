@@ -60,8 +60,8 @@ public class PspControllerTest {
     }
 
     @Test
-    @DisplayName("It should fail to create an psp with invalid data and return a 400 Bad Request status.")
-    void createPsp_WhenInvalidRequest_ShouldReturnBadRequest() throws Exception {
+    @DisplayName("Creating a PSP with an empty database name should fail and return a 400 Bad Request status.")
+    void createPsp_WhenBankNameIsEmpty_ShouldReturnBadRequest() throws Exception {
 
         PspCreateRequest invalidRequestDto = new PspCreateRequest(" ", "12345");
 
