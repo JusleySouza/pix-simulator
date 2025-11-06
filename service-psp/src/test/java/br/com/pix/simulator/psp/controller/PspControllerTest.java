@@ -60,13 +60,30 @@ public class PspControllerTest {
     }
 
     @Test
-    @DisplayName("Creating a PSP with an empty database name should fail and return a 400 Bad Request status.")
+    @DisplayName("Creating a PSP with an empty bank name should fail and return a 400 Bad Request status.")
     void createPsp_WhenBankNameIsEmpty_ShouldReturnBadRequest() throws Exception {
 
-        PspCreateRequest invalidRequestDto = new PspCreateRequest(" ", "12345");
+        PspCreateRequest invalidRequestDto = new PspCreateRequest(" ", "001");
 
         when(service.createPsp(invalidRequestDto))
                 .thenThrow(new ValidationException("Bank name is required."));
+
+        mockMvc.perform(post("/api/v1/psps")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequestDto)))
+                .andExpect(status().isBadRequest());
+
+        verify(service, never()).createPsp(any());
+    }
+
+    @Test
+    @DisplayName("Creating a PSP with an empty bank code should fail and return a 400 Bad Request status.")
+    void createPsp_WhenBankCodeIsEmpty_ShouldReturnBadRequest() throws Exception {
+
+        PspCreateRequest invalidRequestDto = new PspCreateRequest("Inter", " ");
+
+        when(service.createPsp(invalidRequestDto))
+                .thenThrow(new ValidationException("Bank code is required."));
 
         mockMvc.perform(post("/api/v1/psps")
                         .contentType(MediaType.APPLICATION_JSON)
