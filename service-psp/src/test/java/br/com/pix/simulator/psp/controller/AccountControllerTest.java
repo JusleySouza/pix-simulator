@@ -23,6 +23,7 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AccountController.class)
@@ -286,6 +287,22 @@ public class AccountControllerTest {
                 .andExpect(status().isNotFound());
 
         verify(service, times(1)).deposit(eq(accountId), any(DepositRequest.class));
+    }
+
+    @Test
+    @DisplayName("It may fail to deposit is null and return a 400 Bad Request status.")
+    void deposit_WhenDepositIsNull_ShouldReturnBadRequest() throws Exception {
+        UUID accountId = UUID.randomUUID();
+        DepositRequest requestDto = new DepositRequest(null);
+
+        mockMvc.perform(post("/api/v1/accounts/{accountId}/deposit", accountId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("value"))
+                .andExpect(jsonPath("$.errors[0].message").value("Deposit value is required."));
+
+        verify(service, never()).deposit(any(UUID.class), any(DepositRequest.class));
     }
 
     @Test
