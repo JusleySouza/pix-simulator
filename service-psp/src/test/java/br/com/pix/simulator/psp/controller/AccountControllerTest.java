@@ -5,6 +5,7 @@ import br.com.pix.simulator.psp.dto.account.AccountResponse;
 import br.com.pix.simulator.psp.dto.balance.BalanceResponse;
 import br.com.pix.simulator.psp.dto.balance.DepositRequest;
 import br.com.pix.simulator.psp.exception.ResourceNotFoundException;
+import br.com.pix.simulator.psp.exception.ValidationException;
 import br.com.pix.simulator.psp.mapper.AccountMapper;
 import br.com.pix.simulator.psp.service.AccountService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -68,8 +69,11 @@ public class AccountControllerTest {
     void createAccount_WhenInvalidRequest_ShouldReturnBadRequest() throws Exception {
 
         AccountCreateRequest invalidRequestDto = new AccountCreateRequest(
-                null, null, null, "12345", BigDecimal.TEN
+                UUID.randomUUID(), UUID.randomUUID(), null, "12345", BigDecimal.TEN
         );
+
+        when(service.createAccount(invalidRequestDto))
+                .thenThrow(new ValidationException("Agency is required."));
 
         mockMvc.perform(post("/api/v1/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
