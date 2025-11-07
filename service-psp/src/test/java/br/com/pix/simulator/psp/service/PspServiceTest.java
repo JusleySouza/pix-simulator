@@ -107,4 +107,21 @@ public class PspServiceTest {
         assertTrue(exception.getMessage().contains("PSP not found with ID: " + pspId));
     }
 
+    @Test
+    @DisplayName("The system should return the bank's data when the psp exists.")
+    void searchPspEntity_shouldSucceed_whenPspExists() {
+        UUID pspId = UUID.randomUUID();
+        Psp expectedPsp = new Psp(pspId, "Inter", "001");
+
+        when(pspRepository.findById(pspId)).thenReturn(Optional.of(expectedPsp));
+
+        Psp result = pspService.searchPspEntity(pspId);
+
+        assertNotNull(result);
+        assertEquals(expectedPsp.getPspId(), result.getPspId());
+        assertEquals(expectedPsp.getBankName(), result.getBankName());
+        assertEquals(expectedPsp.getBankCode(), result.getBankCode());
+        verify(pspRepository, times(1)).findById(pspId);
+    }
+
 }
