@@ -98,4 +98,21 @@ public class UserControllerTest {
         verify(service, never()).createUser(any());
     }
 
+    @Test
+    @DisplayName("Creating a User with an invalid user cpf should fail and return a 400 Bad Request status.")
+    void createUser_WhenUserCpfIsInvalid_ShouldReturnBadRequest() throws Exception {
+
+        UserCreateRequest invalidRequestDto = new UserCreateRequest("Pedro Lima", "123.456.789-10");
+
+        mockMvc.perform(post("/api/v1/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequestDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("cpf"))
+                .andExpect(jsonPath("$.errors[0].message").value("Invalid CPF."))
+                .andExpect(jsonPath("$.message").value("Validation Error"));
+
+        verify(service, never()).createUser(any());
+    }
+
 }
