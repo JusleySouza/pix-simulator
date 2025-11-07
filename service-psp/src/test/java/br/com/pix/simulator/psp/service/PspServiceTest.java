@@ -15,8 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,6 +53,23 @@ public class PspServiceTest {
 
         verify(mapper, times(1)).toEntity(request);
         verify(mapper, times(1)).toResponse(psp);
+    }
+
+    @Test
+    @DisplayName("The createPsp command should throw an IllegalArgumentException if the database code already exists.")
+    void createPsp_shouldThrowIllegalArgumentException_whenBankCodeExisting() {
+        PspCreateRequest request = new PspCreateRequest("Inter", "001");
+
+        when(pspRepository.findByBankCode("001")).thenReturn(Optional.of(psp));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> pspService.createPsp(request)
+        );
+
+        assertTrue(exception.getMessage().contains("There is already a PSP with the bank code: " + request.bankCode()));
+
+        verify(pspRepository, never()).save(any());
     }
 
 }
