@@ -61,4 +61,24 @@ public class UserControllerTest {
         verify(service, times(1)).createUser(any(UserCreateRequest.class));
     }
 
+    @Test
+    @DisplayName("Creating a User with an empty user name should fail and return a 400 Bad Request status.")
+    void createUser_WhenUserNameIsEmpty_ShouldReturnBadRequest() throws Exception {
+
+        UserCreateRequest invalidRequestDto = new UserCreateRequest(" ", "385.049.820-41");
+
+        when(service.createUser(eq(invalidRequestDto)))
+                .thenThrow(new ValidationException("User name is required."));
+
+        mockMvc.perform(post("/api/v1/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequestDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("name"))
+                .andExpect(jsonPath("$.errors[0].message").value("User name is required."))
+                .andExpect(jsonPath("$.message").value("Validation Error"));
+
+        verify(service, never()).createUser(any());
+    }
+
 }
