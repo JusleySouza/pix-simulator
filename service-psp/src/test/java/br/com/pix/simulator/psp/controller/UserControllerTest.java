@@ -129,4 +129,18 @@ public class UserControllerTest {
         verify(service, times(1)).searchUserById(userId);
     }
 
+    @Test
+    @DisplayName("It may fail to check for a non-existent user and return a 404 Not Found error.")
+    void searchingUserById_WhenUserNotFound_ShouldNotFound() throws Exception {
+        UUID userId = UUID.randomUUID();
+
+        when(service.searchUserById(userId))
+                .thenThrow(new ResourceNotFoundException("User not found: " + userId));
+
+        mockMvc.perform(get("/api/v1/users/{userId}", userId))
+                .andExpect(status().isNotFound());
+
+        verify(service, times(1)).searchUserById(userId);
+    }
+
 }
