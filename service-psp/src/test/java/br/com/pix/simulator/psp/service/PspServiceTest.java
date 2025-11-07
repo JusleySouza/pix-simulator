@@ -94,7 +94,7 @@ public class PspServiceTest {
 
     @Test
     @DisplayName("The searchPspById command should throw an ResourceNotFoundException if the id psp is not found.")
-    void searchPspById_shouldResourceNotFoundException_whenBankCodeExisting() {
+    void searchPspById_shouldResourceNotFoundException_whenIdNotFound() {
         UUID pspId = UUID.randomUUID();
 
         when(pspRepository.findById(pspId)).thenReturn(Optional.empty());
@@ -122,6 +122,21 @@ public class PspServiceTest {
         assertEquals(expectedPsp.getBankName(), result.getBankName());
         assertEquals(expectedPsp.getBankCode(), result.getBankCode());
         verify(pspRepository, times(1)).findById(pspId);
+    }
+
+    @Test
+    @DisplayName("The searchPspEntity command should throw an ResourceNotFoundException if the psp is not found.")
+    void searchPspEntity_shouldResourceNotFoundException_whenPspNotFound() {
+        UUID pspId = UUID.randomUUID();
+
+        when(pspRepository.findById(pspId)).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> pspService.searchPspEntity(pspId)
+        );
+
+        assertTrue(exception.getMessage().contains("PSP not found with ID: " + pspId));
     }
 
 }
