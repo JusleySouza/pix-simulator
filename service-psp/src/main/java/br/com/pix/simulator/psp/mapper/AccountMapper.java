@@ -11,8 +11,6 @@ import lombok.Generated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
-
 @Component
 @Generated
 public class AccountMapper {

@@ -6,8 +6,6 @@ import br.com.pix.simulator.psp.model.Psp;
 import lombok.Generated;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
-
 @Component
 @Generated
 public class PspMapper {
@@ -19,7 +17,6 @@ public class PspMapper {
         }
 
         Psp psp = new Psp();
-       // psp.setPspId(UUID.randomUUID());
         psp.setBankName(request.bankName());
         psp.setBankCode(request.bankCode());
         return psp;

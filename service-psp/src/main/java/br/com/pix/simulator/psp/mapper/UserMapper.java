@@ -6,8 +6,6 @@ import br.com.pix.simulator.psp.model.User;
 import lombok.Generated;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
-
 @Component
 @Generated
 public class UserMapper {
