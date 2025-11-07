@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.hamcrest.Matchers.hasItem;
 
 import java.util.UUID;
 
@@ -70,7 +71,8 @@ public class PspControllerTest {
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].field").value("bankName"))
-                .andExpect(jsonPath("$.errors[0].message").value("Bank name is required."));
+                .andExpect(jsonPath("$.errors[0].message").value("Bank name is required."))
+                .andExpect(jsonPath("$.message").value("Validation Error"));
 
         verify(service, never()).createPsp(any());
     }
@@ -85,8 +87,9 @@ public class PspControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0].field").value("bankCode"))
-                .andExpect(jsonPath("$.errors[0].message").value("Bank code is required."));
+                .andExpect(jsonPath("$.errors[?(@.field == 'bankCode')].message")
+                        .value(hasItem("Bank code is required.")))
+                .andExpect(jsonPath("$.message").value("Validation Error"));
 
         verify(service, never()).createPsp(any());
     }
@@ -102,7 +105,8 @@ public class PspControllerTest {
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].field").value("bankCode"))
-                .andExpect(jsonPath("$.errors[0].message").value("The bank code must contain 3 digits."));
+                .andExpect(jsonPath("$.errors[0].message").value("The bank code must contain 3 digits."))
+                .andExpect(jsonPath("$.message").value("Validation Error"));
 
         verify(service, never()).createPsp(any());
     }
@@ -118,7 +122,8 @@ public class PspControllerTest {
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].field").value("bankCode"))
-                .andExpect(jsonPath("$.errors[0].message").value("The bank code must contain 3 digits."));
+                .andExpect(jsonPath("$.errors[0].message").value("The bank code must contain 3 digits."))
+                .andExpect(jsonPath("$.message").value("Validation Error"));
 
         verify(service, never()).createPsp(any());
     }

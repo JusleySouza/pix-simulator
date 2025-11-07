@@ -77,7 +77,8 @@ public class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].field").value("agency"))
-                .andExpect(jsonPath("$.errors[0].message").value( "Agency is required."));
+                .andExpect(jsonPath("$.errors[0].message").value( "Agency is required."))
+                .andExpect(jsonPath("$.message").value("Validation Error"));
 
         verify(service, never()).createAccount(any());
     }
@@ -95,7 +96,8 @@ public class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].field").value("pspId"))
-                .andExpect(jsonPath("$.errors[0].message").value( "Psp id is required."));
+                .andExpect(jsonPath("$.errors[0].message").value( "Psp id is required."))
+                .andExpect(jsonPath("$.message").value("Validation Error"));
 
         verify(service, never()).createAccount(any());
     }
@@ -113,7 +115,8 @@ public class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].field").value("userId"))
-                .andExpect(jsonPath("$.errors[0].message").value( "User id is required."));
+                .andExpect(jsonPath("$.errors[0].message").value( "User id is required."))
+                .andExpect(jsonPath("$.message").value("Validation Error"));
 
         verify(service, never()).createAccount(any());
     }
@@ -131,7 +134,8 @@ public class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].field").value("agency"))
-                .andExpect(jsonPath("$.errors[0].message").value( "The agency must contain 4 digits."));
+                .andExpect(jsonPath("$.errors[0].message").value( "The agency must contain 4 digits."))
+                .andExpect(jsonPath("$.message").value("Validation Error"));
 
         verify(service, never()).createAccount(any());
     }
@@ -149,7 +153,8 @@ public class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].field").value("agency"))
-                .andExpect(jsonPath("$.errors[0].message").value( "The agency must contain 4 digits."));
+                .andExpect(jsonPath("$.errors[0].message").value( "The agency must contain 4 digits."))
+                .andExpect(jsonPath("$.message").value("Validation Error"));
 
         verify(service, never()).createAccount(any());
     }
@@ -167,7 +172,8 @@ public class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].field").value("accountNumber"))
-                .andExpect(jsonPath("$.errors[0].message").value("Account number is required."));
+                .andExpect(jsonPath("$.errors[0].message").value("Account number is required."))
+                .andExpect(jsonPath("$.message").value("Validation Error"));
 
         verify(service, never()).createAccount(any());
     }
@@ -185,7 +191,8 @@ public class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].field").value("accountNumber"))
-                .andExpect(jsonPath("$.errors[0].message").value("The account number must contain 8 digits."));
+                .andExpect(jsonPath("$.errors[0].message").value("The account number must contain 8 digits."))
+                .andExpect(jsonPath("$.message").value("Validation Error"));
 
         verify(service, never()).createAccount(any());
     }
@@ -203,7 +210,8 @@ public class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].field").value("accountNumber"))
-                .andExpect(jsonPath("$.errors[0].message").value("The account number must contain 8 digits."));
+                .andExpect(jsonPath("$.errors[0].message").value("The account number must contain 8 digits."))
+                .andExpect(jsonPath("$.message").value("Validation Error"));
 
         verify(service, never()).createAccount(any());
     }
@@ -221,7 +229,8 @@ public class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].field").value("initialBalance"))
-                .andExpect(jsonPath("$.errors[0].message").value("Initial balance is required."));
+                .andExpect(jsonPath("$.errors[0].message").value("Initial balance is required."))
+                .andExpect(jsonPath("$.message").value("Validation Error"));
 
         verify(service, never()).createAccount(any());
     }
@@ -239,7 +248,8 @@ public class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(invalidRequestDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].field").value("initialBalance"))
-                .andExpect(jsonPath("$.errors[0].message").value("The initial balance must be greater than zero."));
+                .andExpect(jsonPath("$.errors[0].message").value("The initial balance must be greater than zero."))
+                .andExpect(jsonPath("$.message").value("Validation Error"));
 
         verify(service, never()).createAccount(any());
     }
@@ -289,7 +299,8 @@ public class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].field").value("value"))
-                .andExpect(jsonPath("$.errors[0].message").value("Deposit value is required."));
+                .andExpect(jsonPath("$.errors[0].message").value("Deposit value is required."))
+                .andExpect(jsonPath("$.message").value("Validation Error"));
 
         verify(service, never()).deposit(any(UUID.class), any(DepositRequest.class));
     }
@@ -305,7 +316,8 @@ public class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].field").value("value"))
-                .andExpect(jsonPath("$.errors[0].message").value("The deposit value must be greater than zero."));
+                .andExpect(jsonPath("$.errors[0].message").value("The deposit value must be greater than zero."))
+                .andExpect(jsonPath("$.message").value("Validation Error"));
 
         verify(service, never()).deposit(any(UUID.class), any(DepositRequest.class));
     }
