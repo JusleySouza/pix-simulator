@@ -72,4 +72,23 @@ public class PspServiceTest {
         verify(pspRepository, never()).save(any());
     }
 
+    @Test
+    @DisplayName("The system should return the bank's data when the bank ID exists.")
+    void searchPspById_shouldSucceed_whenPspExists() {
+        UUID pspId = UUID.randomUUID();
+        PspResponse expectedResponse = new PspResponse(pspId, "Inter", "001");
+
+        when(pspRepository.findById(pspId)).thenReturn(Optional.of(psp));
+        when(mapper.toResponse(psp)).thenReturn(expectedResponse);
+
+        PspResponse result = pspService.searchPspById(pspId);
+
+        assertNotNull(result);
+        assertEquals(expectedResponse.pspId(), result.pspId());
+        assertEquals(expectedResponse.bankName(), result.bankName());
+        assertEquals(expectedResponse.bankCode(), result.bankCode());
+        verify(pspRepository, times(1)).findById(pspId);
+        verify(mapper, times(1)).toResponse(psp);
+    }
+
 }
