@@ -115,4 +115,18 @@ public class UserControllerTest {
         verify(service, never()).createUser(any());
     }
 
+    @Test
+    @DisplayName("You should be able to successfully query your user and receive a 200 OK status.")
+    void searchingUserById_WhenUserExists_ShouldReturnOk() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UserResponse responseDto = new UserResponse(userId, "Pedro Lima", "123.456.789-10");
+
+        when(service.searchUserById(userId)).thenReturn(responseDto);
+
+        mockMvc.perform(get("/api/v1/users/{userId}", userId))
+                .andExpect(status().isOk());
+
+        verify(service, times(1)).searchUserById(userId);
+    }
+
 }
