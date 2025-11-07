@@ -2,6 +2,7 @@ package br.com.pix.simulator.psp.service;
 
 import br.com.pix.simulator.psp.dto.psps.PspCreateRequest;
 import br.com.pix.simulator.psp.dto.psps.PspResponse;
+import br.com.pix.simulator.psp.exception.ResourceNotFoundException;
 import br.com.pix.simulator.psp.mapper.PspMapper;
 import br.com.pix.simulator.psp.model.Psp;
 import br.com.pix.simulator.psp.repository.PspRepository;
@@ -89,6 +90,21 @@ public class PspServiceTest {
         assertEquals(expectedResponse.bankCode(), result.bankCode());
         verify(pspRepository, times(1)).findById(pspId);
         verify(mapper, times(1)).toResponse(psp);
+    }
+
+    @Test
+    @DisplayName("The searchPspById command should throw an ResourceNotFoundException if the id psp is not found.")
+    void searchPspById_shouldResourceNotFoundException_whenBankCodeExisting() {
+        UUID pspId = UUID.randomUUID();
+
+        when(pspRepository.findById(pspId)).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> pspService.searchPspById(pspId)
+        );
+
+        assertTrue(exception.getMessage().contains("PSP not found with ID: " + pspId));
     }
 
 }
