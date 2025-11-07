@@ -81,4 +81,21 @@ public class UserControllerTest {
         verify(service, never()).createUser(any());
     }
 
+    @Test
+    @DisplayName("Creating a User with an empty user cpf should fail and return a 400 Bad Request status.")
+    void createUser_WhenUserCpfIsEmpty_ShouldReturnBadRequest() throws Exception {
+
+        UserCreateRequest invalidRequestDto = new UserCreateRequest("Pedro Lima", " ");
+
+        mockMvc.perform(post("/api/v1/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequestDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[?(@.field == 'cpf')].message")
+                        .value(hasItem("CPF is required.")))
+                .andExpect(jsonPath("$.message").value("Validation Error"));
+
+        verify(service, never()).createUser(any());
+    }
+
 }
