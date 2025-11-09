@@ -4,6 +4,7 @@ import br.com.pix.simulator.psp.dto.user.UserCreateRequest;
 import br.com.pix.simulator.psp.dto.user.UserResponse;
 import br.com.pix.simulator.psp.exception.ResourceNotFoundException;
 import br.com.pix.simulator.psp.mapper.UserMapper;
+import br.com.pix.simulator.psp.model.Psp;
 import br.com.pix.simulator.psp.model.User;
 import br.com.pix.simulator.psp.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -107,6 +108,23 @@ public class UserServiceTest {
         );
 
         assertTrue(exception.getMessage().contains("User not found with ID: " + userId));
+    }
+
+    @Test
+    @DisplayName("The system should return the user's data when the user exists.")
+    void searchUserEntity_shouldSucceed_whenUserExists() {
+        UUID userId = UUID.randomUUID();
+        User expectedUser = new User(userId, "Pablo Silva", "385.049.820-41");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(expectedUser));
+
+        User result = userService.searchUserEntity(userId);
+
+        assertNotNull(result);
+        assertEquals(expectedUser.getUserId(), result.getUserId());
+        assertEquals(expectedUser.getName(), result.getName());
+        assertEquals(expectedUser.getCpf(), result.getCpf());
+        verify(userRepository, times(1)).findById(userId);
     }
 
 }
