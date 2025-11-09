@@ -1,7 +1,5 @@
 package br.com.pix.simulator.psp.service;
 
-import br.com.pix.simulator.psp.dto.psps.PspCreateRequest;
-import br.com.pix.simulator.psp.dto.psps.PspResponse;
 import br.com.pix.simulator.psp.dto.user.UserCreateRequest;
 import br.com.pix.simulator.psp.dto.user.UserResponse;
 import br.com.pix.simulator.psp.mapper.UserMapper;
@@ -17,8 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,6 +55,23 @@ public class UserServiceTest {
 
         verify(mapper, times(1)).toEntity(request);
         verify(mapper, times(1)).toResponse(user);
+    }
+
+    @Test
+    @DisplayName("The createUser command should throw an IllegalArgumentException if the user cpf already exists.")
+    void createUser_shouldThrowIllegalArgumentException_whenCpfExisting() {
+        UserCreateRequest request = new UserCreateRequest("Pablo Silva", "385.049.820-41");
+
+        when(userRepository.findByCpf("385.049.820-41")).thenReturn(Optional.of(user));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> userService.createUser(request)
+        );
+
+        assertTrue(exception.getMessage().contains("CPF already exists"));
+
+        verify(userRepository, never()).save(any());
     }
 
 }
