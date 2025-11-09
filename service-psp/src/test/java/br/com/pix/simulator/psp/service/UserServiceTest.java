@@ -1,8 +1,8 @@
 package br.com.pix.simulator.psp.service;
 
-import br.com.pix.simulator.psp.dto.psps.PspResponse;
 import br.com.pix.simulator.psp.dto.user.UserCreateRequest;
 import br.com.pix.simulator.psp.dto.user.UserResponse;
+import br.com.pix.simulator.psp.exception.ResourceNotFoundException;
 import br.com.pix.simulator.psp.mapper.UserMapper;
 import br.com.pix.simulator.psp.model.User;
 import br.com.pix.simulator.psp.repository.UserRepository;
@@ -92,6 +92,21 @@ public class UserServiceTest {
         assertEquals(expectedResponse.cpf(), result.cpf());
         verify(userRepository, times(1)).findById(userId);
         verify(mapper, times(1)).toResponse(user);
+    }
+
+    @Test
+    @DisplayName("The searchUserById command should throw an ResourceNotFoundException if the id user is not found.")
+    void searchUserById_shouldResourceNotFoundException_whenIdNotFound() {
+        UUID userId = UUID.randomUUID();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> userService.searchUserById(userId)
+        );
+
+        assertTrue(exception.getMessage().contains("User not found with ID: " + userId));
     }
 
 }
