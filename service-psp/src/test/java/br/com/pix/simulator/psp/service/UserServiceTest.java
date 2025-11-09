@@ -1,5 +1,6 @@
 package br.com.pix.simulator.psp.service;
 
+import br.com.pix.simulator.psp.dto.psps.PspResponse;
 import br.com.pix.simulator.psp.dto.user.UserCreateRequest;
 import br.com.pix.simulator.psp.dto.user.UserResponse;
 import br.com.pix.simulator.psp.mapper.UserMapper;
@@ -72,6 +73,25 @@ public class UserServiceTest {
         assertTrue(exception.getMessage().contains("CPF already exists"));
 
         verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("The system should return the user's data when the user ID exists.")
+    void searchUserById_shouldSucceed_whenUserExists() {
+        UUID userId = UUID.randomUUID();
+        UserResponse expectedResponse = new UserResponse(userId, "Pablo Silva", "385.049.820-41");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(mapper.toResponse(user)).thenReturn(expectedResponse);
+
+        UserResponse result = userService.searchUserById(userId);
+
+        assertNotNull(result);
+        assertEquals(expectedResponse.userId(), result.userId());
+        assertEquals(expectedResponse.name(), result.name());
+        assertEquals(expectedResponse.cpf(), result.cpf());
+        verify(userRepository, times(1)).findById(userId);
+        verify(mapper, times(1)).toResponse(user);
     }
 
 }
