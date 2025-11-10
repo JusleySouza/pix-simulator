@@ -4,11 +4,13 @@ import br.com.pix.simulator.psp.exception.InsufficientBalanceException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Generated;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
+@Generated
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -1,5 +1,6 @@
 package br.com.pix.simulator.psp.config;
 
+import lombok.Generated;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
@@ -7,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@Generated
 public class RabbitMQConfig {
 
     public static final String EXCHANGE_NAME = "pix-events-exchange";
