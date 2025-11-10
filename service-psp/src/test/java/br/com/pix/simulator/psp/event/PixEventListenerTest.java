@@ -110,4 +110,18 @@ public class PixEventListenerTest {
         assertEquals(errorMsg, captor.getValue().failureReason());
     }
 
+    // --- onRequestedCredit tests ---
+
+    @Test
+    @DisplayName("[Credit] Must successfully process credit and publish event CREDIT_MADE")
+    void onRequestedCredit_WhenSuccess_ShouldPublishCreditMade() {
+        doNothing().when(accountService).processCredit(destinationAccount, value);
+
+        pixEventListener.onRequestedCredit(request);
+
+        verify(accountService, times(1)).processCredit(destinationAccount, value);
+        verify(publisher, times(1)).publishCreditMade(any(TransactionEventResponse.class));
+        verify(publisher, never()).publishCreditFailed(any());
+    }
+
 }
