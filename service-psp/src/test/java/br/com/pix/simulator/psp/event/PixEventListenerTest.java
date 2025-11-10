@@ -95,4 +95,19 @@ public class PixEventListenerTest {
         assertEquals(transactionId, response.transactionID());
     }
 
+    @Test
+    @DisplayName("[Debit] You should catch the RuntimeException and post DEBIT_FAILED.")
+    void onRequestedDebit_WhenRuntimeException_ShouldPublishDebitFailed() {
+        String errorMsg = "Internal error in PSP";
+        doThrow(new RuntimeException("DB offline")).when(accountService).processDebit(originAccount, value);
+
+        pixEventListener.onRequestedDebit(request);
+
+        verify(publisher, never()).publishDebitMade(any());
+
+        ArgumentCaptor<TransactionEventResponse> captor = ArgumentCaptor.forClass(TransactionEventResponse.class);
+        verify(publisher, times(1)).publishDebitFailed(captor.capture());
+        assertEquals(errorMsg, captor.getValue().failureReason());
+    }
+
 }
