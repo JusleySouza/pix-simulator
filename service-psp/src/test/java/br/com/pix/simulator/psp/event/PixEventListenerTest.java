@@ -124,4 +124,21 @@ public class PixEventListenerTest {
         verify(publisher, never()).publishCreditFailed(any());
     }
 
+    @Test
+    @DisplayName("[Credit] You should catch the ResourceNotFoundException and post CREDIT_FAILED.")
+    void onRequestedCredit_WhenAccountNotFound_ShouldPublishCreditFailed() {
+        String errorMsg = "Internal error in PSP";
+        doThrow(new ResourceNotFoundException(errorMsg)).when(accountService).processCredit(destinationAccount, value);
+
+        pixEventListener.onRequestedCredit(request);
+
+        verify(accountService, times(1)).processCredit(destinationAccount, value);
+        verify(publisher, never()).publishCreditMade(any());
+
+        ArgumentCaptor<TransactionEventResponse> captor = ArgumentCaptor.forClass(TransactionEventResponse.class);
+        verify(publisher, times(1)).publishCreditFailed(captor.capture());
+
+        assertEquals(errorMsg, captor.getValue().failureReason());
+    }
+
 }
