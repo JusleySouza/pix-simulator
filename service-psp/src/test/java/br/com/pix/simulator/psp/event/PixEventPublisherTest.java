@@ -55,4 +55,18 @@ public class PixEventPublisherTest {
         );
     }
 
+    @Test
+    @DisplayName("You must publish the credit event that was correctly completed.")
+    void publishCreditMade_ShouldCallRabbitTemplate() {
+        TransactionEventResponse response = new TransactionEventResponse(transactionId, true, null);
+
+        pixEventPublisher.publishCreditMade(response);
+
+        verify(rabbitTemplate, times(1)).convertAndSend(
+                RabbitMQConfig.EXCHANGE_NAME,
+                RabbitMQConfig.RK_CREDIT_MADE,
+                response
+        );
+    }
+
 }
