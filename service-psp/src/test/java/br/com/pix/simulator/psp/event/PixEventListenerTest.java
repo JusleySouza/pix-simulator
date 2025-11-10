@@ -74,4 +74,25 @@ public class PixEventListenerTest {
         verify(publisher, never()).publishDebitFailed(any());
     }
 
+    @Test
+    @DisplayName("[Debit] You should catch the BalanceInsufficientException and post DEBIT_FAILED.")
+    void onRequestedDebit_WhenBalanceInsufficient_ShouldPublishDebitFailed() {
+        String errorMsg = "Insufficient balance";
+        doThrow(new InsufficientBalanceException(errorMsg)).when(accountService).processDebit(originAccount, value);
+
+        pixEventListener.onRequestedDebit(request);
+
+        verify(accountService, times(1)).processDebit(originAccount, value);
+
+        verify(publisher, never()).publishDebitMade(any());
+
+        ArgumentCaptor<TransactionEventResponse> captor = ArgumentCaptor.forClass(TransactionEventResponse.class);
+        verify(publisher, times(1)).publishDebitFailed(captor.capture());
+
+        TransactionEventResponse response = captor.getValue();
+        assertFalse(response.success());
+        assertEquals(errorMsg, response.failureReason());
+        assertEquals(transactionId, response.transactionID());
+    }
+
 }
