@@ -69,4 +69,18 @@ public class PixEventPublisherTest {
         );
     }
 
+    @Test
+    @DisplayName("You must publish the failed credit event.")
+    void publishCreditFailed_ShouldCallRabbitTemplate() {
+        TransactionEventResponse response = new TransactionEventResponse(transactionId, false, "Account not found");
+
+        pixEventPublisher.publishCreditFailed(response);
+
+        verify(rabbitTemplate, times(1)).convertAndSend(
+                RabbitMQConfig.EXCHANGE_NAME,
+                RabbitMQConfig.RK_CREDIT_FAILED,
+                response
+        );
+    }
+
 }
