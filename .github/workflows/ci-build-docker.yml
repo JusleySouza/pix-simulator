@@ -1,0 +1,36 @@
+# ----------------------------------------
+# PIPELINE DE CI (Continuous Integration)
+# ----------------------------------------
+
+name: CI - Build & Push Docker Images
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  # --- Job for the service-psp ---
+  build-service-psp:
+    if: contains(join(github.event.commits.*.modified, ' '), 'service-psp/')
+    name: Build service-psp
+    uses: ./.github/workflows/reusable-build-push.yml
+    with:
+      service_name: service-psp
+      service_path: ./service-psp
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+  # --- Job for the service-api-gateway ---
+  build-service-api-gateway:
+    if: contains(join(github.event.commits.*.modified, ' '), 'service-api-gateway/')
+    name: Build service-api-gateway
+    uses: ./.github/workflows/reusable-build-push.yml
+    with:
+      service_name: service-api-gateway
+      service_path: ./service-api-gateway
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
