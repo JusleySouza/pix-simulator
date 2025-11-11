@@ -16,7 +16,7 @@ jobs:
       contains(join(github.event.commits.*.modified, ' '), 'pix-simulator/service-psp/') ||
       contains(join(github.event.commits.*.modified, ' '), 'pix-simulator/.github/workflows/')
     name: Build service-psp
-    uses: ./pix-simulator/.github/workflows/reusable-build-push.yml
+    uses: ./pix-simulator/.github/workflows/reusable-build-push.yml@master
     with:
       service_name: service-psp
       service_path: ./pix-simulator/service-psp
