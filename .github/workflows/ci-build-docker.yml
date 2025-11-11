@@ -12,12 +12,14 @@ on:
 jobs:
   # --- Job for the service-psp ---
   build-service-psp:
-    if: contains(join(github.event.commits.*.modified, ' '), 'service-psp/')
+    if:
+      contains(join(github.event.commits.*.modified, ' '), 'pix-simulator/service-psp/') ||
+      contains(join(github.event.commits.*.modified, ' '), '.github/workflows/')
     name: Build service-psp
     uses: ./.github/workflows/reusable-build-push.yml
     with:
       service_name: service-psp
-      service_path: ./service-psp
+      service_path: ./pix-simulator/service-psp
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
