@@ -21,16 +21,3 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
-  # --- Job for the service-api-gateway ---
-  build-service-api-gateway:
-    if: contains(join(github.event.commits.*.modified, ' '), 'service-api-gateway/')
-    name: Build service-api-gateway
-    uses: ./.github/workflows/reusable-build-push.yml
-    with:
-      service_name: service-api-gateway
-      service_path: ./service-api-gateway
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
