@@ -1,0 +1,40 @@
+# ----------------------------------------
+# PIPELINE DE CD (Continuous Deployment) - SIMPLIFICADA
+# ----------------------------------------
+name: CD - Deployment Notification (Docker Hub Ready)
+
+on:
+  workflow_run:
+    workflows: ["CI - Build & Push Docker Images"]
+    types:
+      - completed
+
+jobs:
+  notify-image-ready:
+    name: Notification and Deployment Instructions
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Define Variables and Report Readiness
+        id: image_info
+        run: |
+          echo "DOCKER_REPO_URL=docker.io/${{ secrets.DOCKER_USERNAME }}/" >> $GITHUB_ENV
+          echo "COMMIT_SHA=${{ github.event.workflow_run.head_sha }}" >> $GITHUB_ENV
+          echo "New image based on the commit ${{ env.COMMIT_SHA }} it's ready on Docker Hub."
+
+      - name: 2. Display Deployment Instructions
+        run: |
+          echo "--------------------------------------------------------"
+          echo "✅ SUCCESS! IMAGES PUBLISHED ON DOCKER HUB."
+          echo " "
+          echo "The new service-psp image is available at:"
+          echo "  -> Tag 'latest': ${{ env.DOCKER_REPO_URL }}service-psp:latest"
+          echo "  -> Tag 'SHA': ${{ env.DOCKER_REPO_URL }}service-psp:sha-${{ env.COMMIT_SHA }}"
+          echo " "
+          echo "To manually deploy to the server (replacing the old container):"
+          echo "  1. SSH to the server."
+          echo "  2. Run the command:"
+          echo "     docker pull ${{ env.DOCKER_REPO_URL }}service-psp:latest"
+          echo "     docker compose up -d"
+          echo "--------------------------------------------------------"
