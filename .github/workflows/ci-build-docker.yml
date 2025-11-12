@@ -29,6 +29,10 @@ jobs:
       image-name: service-psp-app
       dockerhub-repo: pix-simulator
 
+    optional-dockerhub-publish:
+      uses: ./.github/workflows/reusable-dockerhub-publish.yml
+      secrets: inherit
+
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
