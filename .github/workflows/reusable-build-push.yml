@@ -8,15 +8,15 @@ on:
   workflow_call:
     inputs:
       service-path:
-        description: 'The path to the service directory (e.g., pix-simulator/service-psp/)'
+        description: 'Path to the service directory (e.g., service-psp/)'
         required: true
         type: string
       image-name:
-        description: 'The name of the Docker image (e.g., service-psp)'
+        description: 'Docker image name (e.g., service-psp-app)'
         required: true
         type: string
       dockerhub-repo:
-        description: 'The base Docker Hub repository name'
+        description: 'Docker Hub repository name (e.g., pix-simulator)'
         required: true
         type: string
     secrets:
@@ -24,7 +24,7 @@ on:
         description: 'Docker Hub Username'
         required: true
       DOCKER_PASSWORD:
-        description: 'Docker Hub Token'
+        description: 'Docker Hub Password/Token'
         required: true
 
 jobs:
@@ -33,9 +33,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-
-      - name: Change Directory to Service
-        run: cd ${{ inputs.service-path }}
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -77,17 +74,17 @@ jobs:
         run: echo "IMAGE_REPO=ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/${{ inputs.image-name }}" >> $GITHUB_ENV
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image (GHCR)
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
-          context: ${{ inputs.service-path }}
-          file: ${{ inputs.service-path }}/Dockerfile
+          context: ./${{ inputs.service-path }}
+          file: ./${{ inputs.service-path }}/Dockerfile
           push: true
           tags: |
             ${{ env.IMAGE_REPO }}:latest
@@ -95,9 +92,9 @@ jobs:
           platforms: linux/amd64,linux/arm64
 
   optional-dockerhub-publish:
-    if: (contains(github.event.head_commit.message, '[publish-dockerhub]') || github.ref_type == 'tag')
-    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, '[publish-dockerhub]') || github.ref_type == 'tag'
     needs: build-and-test
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -106,17 +103,16 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        if: ${{ secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != '' }}
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push to Docker Hub
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
-          context: ${{ inputs.service-path }}
-          file: ${{ inputs.service-path }}/Dockerfile
+          context: ./${{ inputs.service-path }}
+          file: ./${{ inputs.service-path }}/Dockerfile
           push: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/${{ inputs.dockerhub-repo }}:latest
