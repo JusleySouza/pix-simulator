@@ -26,10 +26,3 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
-  optional-dockerhub-publish:
-    needs: build-service-psp
-    uses: ./.github/workflows/reusable-dockerhub-publish.yml
-    secrets: inherit
-    with:
-      service-path: service-psp
