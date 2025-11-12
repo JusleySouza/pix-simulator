@@ -122,4 +122,4 @@ Este serviço depende das seguintes variáveis de ambiente para funcionar. Elas 
 | `DB_PASSWORD` | Senha (usado pelo Compose) | `DB_PASSWORD=sua_senha`                         |
 
 ### 7. Autor
-Criado por **Jusley Souza**
+Criado por **Jusley H. Souza**
