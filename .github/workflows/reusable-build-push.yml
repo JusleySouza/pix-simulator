@@ -20,10 +20,10 @@ on:
         required: true
         type: string
     secrets:
-      DOCKERHUB_USERNAME:
+      DOCKER_USERNAME:
         description: 'Docker Hub Username'
         required: true
-      DOCKERHUB_TOKEN:
+      DOCKER_PASSWORD:
         description: 'Docker Hub Token'
         required: true
 
