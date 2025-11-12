@@ -86,7 +86,8 @@ jobs:
       - name: Build and push Docker image (GHCR)
         uses: docker/build-push-action@v4
         with:
-          context: ${{ inputs.service-path }}/Dockerfile
+          context: ${{ inputs.service-path }}
+          file: ${{ inputs.service-path }}/Dockerfile
           push: true
           tags: |
             ${{ env.IMAGE_REPO }}:latest
@@ -114,7 +115,8 @@ jobs:
       - name: Build and push to Docker Hub
         uses: docker/build-push-action@v4
         with:
-          context: ${{ inputs.service-path }}/Dockerfile
+          context: ${{ inputs.service-path }}
+          file: ${{ inputs.service-path }}/Dockerfile
           push: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/${{ inputs.dockerhub-repo }}:latest
