@@ -18,21 +18,18 @@ permissions:
 
 jobs:
   build-service-psp:
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      contains(join(github.event.commits.*.modified, ' '), 'service-psp/')
-
     uses: ./.github/workflows/reusable-build-push.yml
-
     with:
       service-path: service-psp
       image-name: service-psp-app
       dockerhub-repo: pix-simulator
-
-    optional-dockerhub-publish:
-      uses: ./.github/workflows/reusable-dockerhub-publish.yml
-      secrets: inherit
-
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+  optional-dockerhub-publish:
+    needs: build-service-psp
+    uses: ./.github/workflows/reusable-dockerhub-publish.yml
+    secrets: inherit
+    with:
+      service-path: service-psp

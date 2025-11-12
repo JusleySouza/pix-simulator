@@ -28,9 +28,6 @@ on:
         required: true
 
 jobs:
-  publish:
-    if: contains(github.event.head_commit.message, '[publish-dockerhub]')
-    runs-on: ubuntu-latest
   build-and-test:
     runs-on: ubuntu-latest
     steps:
@@ -122,4 +119,8 @@ jobs:
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/${{ inputs.dockerhub-repo }}:latest
             ${{ secrets.DOCKER_USERNAME }}/${{ inputs.dockerhub-repo }}:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created=${{ github.event.head_commit.timestamp }}
           platforms: linux/amd64,linux/arm64
