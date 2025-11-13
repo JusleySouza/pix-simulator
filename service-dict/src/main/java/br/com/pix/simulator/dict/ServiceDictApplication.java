@@ -1,0 +1,15 @@
+package br.com.pix.simulator.dict;
+
+import lombok.Generated;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@Generated
+@SpringBootApplication
+public class ServiceDictApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(ServiceDictApplication.class, args);
+	}
+
+}
