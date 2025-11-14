@@ -43,6 +43,26 @@ services:
       timeout: 5s
       retries: 5
 
+  # Service-dict Database
+  postgres-dict:
+    image: postgres:15-alpine
+    container_name: postgres-dict
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DICT_DB_NAME}
+    ports:
+      - "5434:5432"
+    volumes:
+      - dict_data:/var/lib/postgresql/data
+    networks:
+      - pix-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d db_dict" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # --- 2. MICROSSERVICES ---
 
   # Service PSP (Accounts and Balances)
@@ -73,6 +93,33 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+
+  # Service DICT (Pix Key Directory)
+  service-dict:
+    build:
+      context: ./service-dict
+      args:
+        JAR_FILE: service-dict-*.jar
+    container_name: service-dict
+    environment:
+      - SPRING_JPA_SHOW-SQL=${SHOW_SQL}
+      - SPRING_JPA_HIBERNATE_DDL-AUTO=${DDL_AUTO}
+      - SPRING_DATASOURCE_DRIVERCLASSNAME=${DRIVER}
+      - SPRING_DATASOURCE_URL=${DICT_CONNECTION_STRING}
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=${DIALECT}
+      - SPRING_JPA_PROPERTIES_HIBERNATE_JDBC_LOB_NON_CONTEXTUAL_CREATION=${CONTEXTUAL_CREATION}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - PSP_SERVICE_URL=${PSP_SERVICE_URL}
+    ports:
+      - "8082:8082"
+    networks:
+      - pix-network
+    depends_on:
+      postgres-dict:
+        condition: service_healthy
+      service-psp:
+        condition: service_started
 
 # --- 3. NETWORK AND VOLUMES ---
 
