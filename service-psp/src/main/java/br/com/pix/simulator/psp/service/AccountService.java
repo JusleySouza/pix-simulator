@@ -3,6 +3,7 @@ package br.com.pix.simulator.psp.service;
 import br.com.pix.simulator.psp.config.LoggerConfig;
 import br.com.pix.simulator.psp.dto.account.AccountCreateRequest;
 import br.com.pix.simulator.psp.dto.account.AccountResponse;
+import br.com.pix.simulator.psp.dto.account.PspAccountValidationResponse;
 import br.com.pix.simulator.psp.dto.balance.BalanceResponse;
 import br.com.pix.simulator.psp.dto.balance.DepositRequest;
 import br.com.pix.simulator.psp.exception.ResourceNotFoundException;
@@ -100,6 +101,22 @@ public class AccountService {
         LoggerConfig.LOGGER_ACCOUNT.info("Credit : " + value + " successfully completed!");
 
         accountRepository.save(account);
+    }
+
+    @Transactional(readOnly = true)
+    public PspAccountValidationResponse validateAccount(UUID accountId, UUID userId, UUID pspId) {
+
+        Account account = accountRepository
+                .findByValidationKeys(accountId, userId, pspId)
+                .orElseThrow(() -> new ResourceNotFoundException( "Invalid account or user/PSP ID combination."));
+
+        return new PspAccountValidationResponse(
+                account.getAccountId(),
+                account.getUser().getUserId(),
+                account.getPsp().getPspId(),
+                account.getUser().getName(),
+                account.getPsp().getBankName()
+        );
     }
 
 }
