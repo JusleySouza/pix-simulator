@@ -2,6 +2,7 @@ package br.com.pix.simulator.psp.controller;
 
 import br.com.pix.simulator.psp.dto.account.AccountCreateRequest;
 import br.com.pix.simulator.psp.dto.account.AccountResponse;
+import br.com.pix.simulator.psp.dto.account.PspAccountValidationResponse;
 import br.com.pix.simulator.psp.dto.balance.BalanceResponse;
 import br.com.pix.simulator.psp.dto.balance.DepositRequest;
 import br.com.pix.simulator.psp.service.AccountService;
@@ -41,6 +42,15 @@ public class AccountController {
     @Operation(summary = "Check your balance", description = "Check the current balance of the bank account.")
     public ResponseEntity<BalanceResponse> checkBalance(@PathVariable UUID accountId) {
         return ResponseEntity.ok(accountService.checkBalance(accountId));
+    }
+
+    @GetMapping("/{accountId}/valid")
+    public ResponseEntity<PspAccountValidationResponse> validateAccount(
+            @PathVariable UUID accountId,
+            @RequestParam UUID userId,
+            @RequestParam UUID pspId) {
+        PspAccountValidationResponse response = accountService.validateAccount(accountId, userId, pspId);
+        return ResponseEntity.ok(response);
     }
 
 }
