@@ -22,7 +22,7 @@ public class PspClientService {
 
     public boolean validateAccount(KeyCreateRequest request) {
         String url = String.format(
-                "%s/%s/valida?userId=%s&pspId=%s",
+                "%s/%s/valid?userId=%s&pspId=%s",
                 pspServiceUrl,
                 request.accountId(),
                 request.userId(),
@@ -33,7 +33,7 @@ public class PspClientService {
             LoggerConfig.LOGGER_PSP_CLIENT.info("Validating account on PSP: {}", url);
             PspAccountValidationResponse response = restTemplate.getForObject(url, PspAccountValidationResponse.class);
 
-            if (response == null || !response.isValid()) {
+            if (response == null) {
                 LoggerConfig.LOGGER_PSP_CLIENT.warn("Account validation failed (invalid response from PSP).");
                 return false;
             }
