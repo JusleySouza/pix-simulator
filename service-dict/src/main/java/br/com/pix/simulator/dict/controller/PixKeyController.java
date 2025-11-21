@@ -26,4 +26,11 @@ public class PixKeyController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @GetMapping("/{keyValue}")
+    @Operation(summary = "Search for a Pix Key")
+    public ResponseEntity<KeyResponse> findKey(@PathVariable String keyValue) {
+        KeyResponse response = pixKeyService.findKey(keyValue);
+        return ResponseEntity.ok(response);
+    }
+
 }
