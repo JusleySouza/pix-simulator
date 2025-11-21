@@ -52,6 +52,20 @@ public class PixKeyService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public KeyResponse findKey(String keyValue) {
+        LoggerConfig.LOGGER_PIX_KEY.info("Searching for key: {}", keyValue);
+
+        PixKey key = pixKeyRepository.findById(keyValue)
+                .orElseThrow(() -> {
+                    return new KeyNotFoundException("Pix key not found: " + keyValue);
+                });
+
+        LoggerConfig.LOGGER_PIX_KEY.info("Key : " + keyValue + " successfully returned!");
+        return toResponse(key);
+    }
+
+
     private KeyResponse toResponse(PixKey key) {
         return new KeyResponse(
                 key.getKeyValue(),
