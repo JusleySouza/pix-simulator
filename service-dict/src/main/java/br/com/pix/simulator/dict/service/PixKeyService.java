@@ -65,6 +65,18 @@ public class PixKeyService {
         return toResponse(key);
     }
 
+    @Transactional
+    public void deleteKey(String keyValue) {
+        LoggerConfig.LOGGER_PIX_KEY.info("Attempt to remove the key: {}", keyValue);
+
+        if (!pixKeyRepository.existsById(keyValue)) {
+            throw new KeyNotFoundException("Cannot be removed. Pix key not found: " + keyValue);
+        }
+
+        pixKeyRepository.deleteById(keyValue);
+        LoggerConfig.LOGGER_PIX_KEY.info("Key successfully removed: {}", keyValue);
+    }
+
 
     private KeyResponse toResponse(PixKey key) {
         return new KeyResponse(
