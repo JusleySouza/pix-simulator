@@ -33,4 +33,11 @@ public class PixKeyController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/{keyValue}")
+    @Operation(summary = "Delete a Pix Key")
+    public ResponseEntity<Void> deleteKey(@PathVariable String keyValue) {
+        pixKeyService.deleteKey(keyValue);
+        return ResponseEntity.noContent().build();
+    }
+
 }
